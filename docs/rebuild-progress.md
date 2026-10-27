@@ -21,7 +21,7 @@
 
 The worktree is on `codex/gpl-sweep-rebuild`, rooted at accepted Sweep `fa52a26`. Independent replacements and vetted Aaron modules are integrated. Independent source/provenance review found no remaining expressive middle-fork implementation in the reviewed source. See [the final provenance index](rebuild/final-source-provenance.md) and [verification report](rebuild/verification.md).
 
-The full finite TypeScript suite passes 516 tests; the unchanged Python suite passes 130. Typechecking, build, formatting, packaging, package layout, corpus validation, and gRPC integrations pass. The candidate VSIX is saved under `outputs/`; it has not been installed or pushed. Source snapshot is committed as `30226d334f835c3383e75e73eac0e40d8ea5ba1f`, directly on accepted Sweep; the documentation receipt is recorded separately.
+The full finite TypeScript suite passes 516 tests; the unchanged Python suite passes 130. Typechecking, build, formatting, packaging, package layout, corpus validation, and gRPC integrations pass. The candidate VSIX is saved under `artifacts/`; it has not been installed or pushed. Source snapshot is committed as `30226d334f835c3383e75e73eac0e40d8ea5ba1f`, directly on accepted Sweep; the documentation receipt is recorded separately.
 
 All 56 balanced warm/typing/cache pairs and three fresh-process pairs have identical prompts and applied outputs. No material source-path latency regression was observed in the tested corpus. An isolated copy of the older installed runtime also matched eight warm and four typing outputs. Real editor paint is not inferred from these results.
 

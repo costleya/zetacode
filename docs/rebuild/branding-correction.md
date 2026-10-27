@@ -6,4 +6,4 @@ A second shape-level history review corrected the earlier asset assessment. Main
 
 The seven marketplace/status/loading SVG and PNG inputs are restored byte-for-byte from that pinned main commit. The corrected generator still emits `assets/nesweep-icons.ttf` from those inputs, preserving the Chromium font-decoding fix. The old WOFF2 wrapper is not restored. Extension behavior, inference, caching and runtime sources are unchanged.
 
-The current asset hashes are recorded in `branding-assets.sha256`; the earlier source manifest continues to describe the initial snapshot rather than silently changing its historical hashes. The corrected package is saved separately as `outputs/nesweep-gpl-rebuild-main-icons.vsix`, preserving the original audited VSIX.
+The current asset hashes are recorded in `branding-assets.sha256`; the earlier source manifest continues to describe the initial snapshot rather than silently changing its historical hashes. The corrected package is saved separately as `artifacts/nesweep-gpl-rebuild-main-icons.vsix`, preserving the original audited VSIX.

@@ -38,7 +38,7 @@ class PackageLayoutTests(unittest.TestCase):
             "tools/zeta-server/outputs/result.json",
             "tools/zeta-server/.venv/bin/python",
             "tools/zeta-server/weights/model.safetensors",
-            "outputs/result.json",
+            "artifacts/result.json",
             "tools/zeta-server/src/__pycache__/sentinel.pyc",
             "tools/zeta-server/src/__pycache__/accidental.py",
             "tools/zeta-server/src/nested/__pycache__/sentinel.pyc",
