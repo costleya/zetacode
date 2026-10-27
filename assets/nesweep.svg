@@ -1,4 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <circle cx="512" cy="512" r="488" fill="#12342D"/>
-  <path d="M 280 740 V 284 L 744 740 V 284" fill="none" stroke="#B9F6BA" stroke-width="96" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1254 1254" width="1024" height="1024">
+  <title>NESweep — folded ribbon Z and chevron</title>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#18112f"/><stop offset="1" stop-color="#120d2b"/></linearGradient>
+    <linearGradient id="horizontal" gradientUnits="userSpaceOnUse" x1="175" y1="300" x2="743" y2="440"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#4dd0f5"/></linearGradient>
+    <linearGradient id="diagonal" gradientUnits="userSpaceOnUse" x1="200" y1="850" x2="654" y2="350"><stop stop-color="#69def2"/><stop offset="0.5" stop-color="#269ef7"/><stop offset="1" stop-color="#1689fc"/></linearGradient>
+    <linearGradient id="bottom" gradientUnits="userSpaceOnUse" x1="190" y1="800" x2="735" y2="920"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#48cff2"/></linearGradient>
+    <linearGradient id="lower" gradientUnits="userSpaceOnUse" x1="715" y1="980" x2="1055" y2="620"><stop stop-color="#ffffff"/><stop offset="0.48" stop-color="#4bd4f4"/><stop offset="1" stop-color="#0787fc"/></linearGradient>
+    <linearGradient id="upper" gradientUnits="userSpaceOnUse" x1="758" y1="245" x2="1110" y2="666"><stop stop-color="#ffffff"/><stop offset="0.45" stop-color="#73ddf5"/><stop offset="1" stop-color="#00b4f4"/></linearGradient>
+  </defs>
+  <rect width="1254" height="1254" rx="240" fill="url(#background)"/>
+  <path d="M252 772H660C759 772 759 922 660 922H252C209 922 175 888 175 845V772Z" fill="url(#bottom)"/>
+  <path d="M235 252H644Q681 250 700 286L737 354Q754 389 727 414L299 772L179 865Q175 854 175 840V681Q175 670 185 661L494 405H235C131 405 131 252 235 252Z" fill="url(#diagonal)"/>
+  <path d="M235 252H644Q681 250 700 286L737 354Q749 381 735 404L235 405C131 405 131 252 235 252Z" fill="url(#horizontal)"/>
+  <path d="M494 405L660 270Q677 255 690 272Q697 280 700 286L737 354Q749 381 735 404Z" fill="#35bdf5" opacity="0.55"/>
+  <path d="M1060 628L756 965" fill="none" stroke="url(#lower)" stroke-width="151" stroke-linecap="round"/>
+  <path d="M846 240L1117 590Q1136 612 1136 636V653Q1136 676 1121 696L1067 758Q1074 733 1055 710L753 326C730 298 735 262 759 238C783 214 820 212 846 240Z" fill="url(#upper)"/>
 </svg>

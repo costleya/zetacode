@@ -1,5 +1,7 @@
 # Final source provenance index
 
+The initial snapshot described here was subsequently corrected to restore main's ribbon artwork. See [branding correction](branding-correction.md) for the revised asset-history assessment and follow-up hashes. The original snapshot hashes below remain historical evidence.
+
 ## Status and source pins
 
 This index tracks the source lineage of the Sweep-based reconstruction. It is an engineering provenance record, not a legal opinion or a percentage-based similarity assessment. The user has accepted `fa52a26` as the reconstruction's Sweep source premise; that decision is treated as settled here.
