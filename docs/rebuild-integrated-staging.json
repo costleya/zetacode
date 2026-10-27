@@ -1,0 +1,150 @@
+[
+  {
+    "path": "src/api/completion-client.ts",
+    "source": "/private/tmp/nes-rebuild-safe-ports"
+  },
+  {
+    "path": "src/api/continuation.ts",
+    "source": "/private/tmp/nes-rebuild-safe-ports"
+  },
+  {
+    "path": "src/api/generated/completion.ts",
+    "source": "/private/tmp/nes-rebuild-safe-ports"
+  },
+  {
+    "path": "src/services/managed-local-server.ts",
+    "source": "/private/tmp/nes-rebuild-safe-ports"
+  },
+  {
+    "path": "src/core/constants.ts",
+    "source": "/private/tmp/nes-rebuild-safe-ports"
+  },
+  {
+    "path": "src/telemetry/document-tracker.ts",
+    "source": "/private/tmp/nes-rebuild-tracker"
+  },
+  {
+    "path": "src/telemetry/edit-merger.ts",
+    "source": "/private/tmp/nes-rebuild-tracker"
+  },
+  {
+    "path": "src/api/client.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/completion-cache.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/completion-client.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/continuation.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/generated/completion.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/history.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/parser.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/prompt.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/retrieval-chunks.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/rules.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/schemas.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "src/api/symbol-outline.ts",
+    "source": "/private/tmp/nes-rebuild-api"
+  },
+  {
+    "path": "package.json",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/core/config.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/core/constants.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/core/logger.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "package.json",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/core/config.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/core/constants.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/core/logger.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/extension/activate.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/extension/rules-diagnostics.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/extension/status-bar.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/services/completion-server.ts",
+    "source": "/private/tmp/nes-rebuild-glue"
+  },
+  {
+    "path": "src/editor/edit-display-classifier.ts",
+    "source": "/private/tmp/nes-rebuild-editor"
+  },
+  {
+    "path": "src/editor/inline-edit-provider.ts",
+    "source": "/private/tmp/nes-rebuild-editor"
+  },
+  {
+    "path": "src/editor/jump-edit-manager.ts",
+    "source": "/private/tmp/nes-rebuild-editor"
+  },
+  {
+    "path": "src/editor/proposed-inline-edit.ts",
+    "source": "/private/tmp/nes-rebuild-editor"
+  },
+  {
+    "path": "src/editor/split-edit-segments.ts",
+    "source": "/private/tmp/nes-rebuild-editor"
+  },
+  {
+    "path": "src/editor/syntax-highlight-renderer.ts",
+    "source": "/private/tmp/nes-rebuild-editor"
+  }
+]

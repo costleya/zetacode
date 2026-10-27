@@ -1,0 +1,85 @@
+{
+  "reference_head": "46fbc0a0ccafb7f6bb95a6cda9207446bc7cc070",
+  "sweep_base": "fa52a26b31d755c3e3d8e1f2d857a77d39cfebbb",
+  "artifacts": [
+    {
+      "path": "src/api/completion-client.ts",
+      "staged_path": "src/api/completion-client.ts",
+      "kind": "current implementation copy",
+      "introducing_commits": ["79ea684", "661b1cc"],
+      "provenance_assessment": "Aaron gRPC-over-Unix-socket implementation and OTel extension. Some blame on old Ollama/llama files marks shared CompletionRequest/CompletionResult fields and Promise lifecycle idioms; endpoint-specific HTTP implementation is absent.",
+      "port_caveat": "For strict clean-room provenance, retype the small API contracts and settled/cancellation flow from gRPC schema rather than copying the same declarations/helpers."
+    },
+    {
+      "path": "src/api/continuation.ts",
+      "staged_path": "src/api/continuation.ts",
+      "kind": "current implementation copy",
+      "introducing_commits": ["14f3442", "36cccf2"],
+      "provenance_assessment": "Aaron FIM continuation construction and output validation. One old blame attribution is the shared CompletionResult type import; no SR algorithm body identified.",
+      "port_caveat": "Requires the Aaron continuation tests/caller contract and Qwen fallback integration."
+    },
+    {
+      "path": "src/api/generated/completion.ts",
+      "staged_path": "src/api/generated/completion.ts",
+      "kind": "generated output copy",
+      "introducing_commits": ["79ea684"],
+      "provenance_assessment": "Generated TypeScript gRPC codecs/client from Aaron's own completion.proto; generic names and generated boilerplate are not evidence of copied implementation.",
+      "port_caveat": "Prefer regenerating from staged tools/zeta-server/src/proto/completion.proto."
+    },
+    {
+      "path": "tools/zeta-server/src/proto/completion.proto",
+      "staged_path": "tools/zeta-server/src/proto/completion.proto",
+      "kind": "schema source copy",
+      "introducing_commits": ["79ea684"],
+      "provenance_assessment": "Aaron-authored protocol schema for the gRPC server/client."
+    },
+    {
+      "path": "src/services/managed-local-server.ts",
+      "staged_path": "src/services/managed-local-server.ts",
+      "kind": "current implementation copy",
+      "introducing_commits": ["36cccf2", "79ea684", "7fcf832", "661b1cc"],
+      "provenance_assessment": "Aaron managed-model provisioning, launch/process lifecycle, validation, locking, cleanup, gRPC integration, MLX residency and telemetry. Old-source line matches inspected at the imports only.",
+      "port_caveat": "Requires Aaron local-runtime and managed-setup-status modules and matching Python server/helper distribution."
+    },
+    {
+      "path": "src/core/constants.ts",
+      "staged_path": "src/core/constants.ts",
+      "kind": "filtered merge",
+      "introducing_commits": ["b52a589", "36cccf2"],
+      "provenance_assessment": "Sweep baseline constants retained; adds only current Aaron model identifiers MODEL_NAME and CONTINUATION_MODEL_NAME. Middle-fork settings removed from this candidate.",
+      "port_caveat": "Consumers of excluded constants must be removed or independently reconstructed."
+    },
+    {
+      "path": "src/editor/syntax-highlight-renderer.ts",
+      "staged_path": "src/editor/syntax-highlight-renderer.native-fragment.ts",
+      "kind": "Aaron-authored native API fragment",
+      "introducing_commits": ["ff445be"],
+      "provenance_assessment": "Native VS Code token acquisition and proposal-gated event helper extracted; whole source renderer is mixed and not staged.",
+      "port_caveat": "Merge into Sweep renderer with rendering, cache, proposal metadata, activation, and test changes in RENDERER-INTEGRATION.md."
+    },
+    {
+      "path": "src/editor/inline-edit-provider.ts",
+      "staged_path": "src/editor/inline-edit-provider.fim-fragments.md",
+      "kind": "Aaron FIM-first lifecycle splice guide",
+      "introducing_commits": ["2e1b0b6"],
+      "provenance_assessment": "Contains the FimSession state, intermediate result publication, late Zeta upgrade capture/trigger gates, show/reject/end guards, and invalidation sites. Excludes inherited request building, candidate classification, render helpers, and staleness helper bodies.",
+      "port_caveat": "Show/reject/end methods have no explicit TS call sites; verify the VS Code proposed provider lifecycle callback contract before integration."
+    },
+    {
+      "path": "src/editor/jump-edit-manager.ts",
+      "staged_path": "src/editor/jump-edit-manager.async-render-fragments.md",
+      "kind": "Aaron async preview race-guard splice guide",
+      "introducing_commits": ["ff445be", "661b1cc"],
+      "provenance_assessment": "Captures render nonce, disposed/document/editor identity guards, await checks, refresh callback invalidation, and logging around async preview generation; includes later Aaron render-outcome completion hook from 661b1cc. Existing decoration computation is omitted.",
+      "port_caveat": "Apply these guards to the Sweep base renderer methods and keep existing decoration generation logic."
+    },
+    {
+      "path": "src/api/client.ts",
+      "staged_path": "src/api/client.aaron-orchestration-fragments.md",
+      "kind": "Aaron FIM-first route and continuation orchestration extraction guide",
+      "introducing_commits": ["14f3442", "36cccf2", "e8732da", "79ea684", "661b1cc", "2e1b0b6"],
+      "provenance_assessment": "Extracts API tracing wrapper, route sequencing, snapshot/eligibility/deadline rules, lazy continuation/timer lifecycle, FIM-first intermediate publication, Zeta completion callback behavior and FIM-vs-Zeta upgrade selection. Mixed Sweep prompt/cache/history/retrieval/diagnostic and response-normalization bodies are excluded and represented as adapters.",
+      "port_caveat": "This is a splice guide with adapter placeholders, not a drop-in client. Preserve readiness, deadline start semantics, cache/success hooks, cancellation cleanup, in-flight accounting, and all trace events."
+    }
+  ]
+}

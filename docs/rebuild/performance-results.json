@@ -1,0 +1,213 @@
+{
+  "status": "source-path measurements complete; editor presentation pending",
+  "scope": "Production ApiClient, real CompletionClient, actual local models, applied edits; synthetic VS Code documents/LSP. This does not measure editor paint.",
+  "hardware": "Apple M5 Max, 18 cores, 64 GiB",
+  "corpus_sha256": "b99af49ab8b18ad5bb2d54cfdd3abfee5820e3b52b780a7e6085c055056ffa91",
+  "balanced_warm": {
+    "pairs": 56,
+    "exactPromptAndAppliedPairs": 56,
+    "perCaseMedians": [
+      {
+        "sequence": "warm",
+        "step": 0,
+        "completeMs": {
+          "reference": 229.48035399999998,
+          "candidate": 231.322229
+        },
+        "sourceUsableMs": {
+          "reference": 59.790354,
+          "candidate": 59.723812499999994
+        }
+      },
+      {
+        "sequence": "warm",
+        "step": 1,
+        "completeMs": {
+          "reference": 401.257104,
+          "candidate": 403.79064600000004
+        },
+        "sourceUsableMs": {
+          "reference": 401.257104,
+          "candidate": 403.79064600000004
+        }
+      },
+      {
+        "sequence": "warm",
+        "step": 2,
+        "completeMs": {
+          "reference": 1797.6951669999999,
+          "candidate": 1796.3263755
+        },
+        "sourceUsableMs": {
+          "reference": null,
+          "candidate": null
+        }
+      },
+      {
+        "sequence": "warm",
+        "step": 3,
+        "completeMs": {
+          "reference": 237.49762450000003,
+          "candidate": 238.7713540000002
+        },
+        "sourceUsableMs": {
+          "reference": null,
+          "candidate": null
+        }
+      },
+      {
+        "sequence": "warm",
+        "step": 4,
+        "completeMs": {
+          "reference": 182.9097495000001,
+          "candidate": 188.74216649999994
+        },
+        "sourceUsableMs": {
+          "reference": null,
+          "candidate": null
+        }
+      },
+      {
+        "sequence": "warm",
+        "step": 5,
+        "completeMs": {
+          "reference": 263.6607294999999,
+          "candidate": 262.8452500000001
+        },
+        "sourceUsableMs": {
+          "reference": null,
+          "candidate": null
+        }
+      },
+      {
+        "sequence": "warm",
+        "step": 6,
+        "completeMs": {
+          "reference": 2525.269354,
+          "candidate": 2527.3932705
+        },
+        "sourceUsableMs": {
+          "reference": 2525.269354,
+          "candidate": 2527.3932705
+        }
+      },
+      {
+        "sequence": "warm",
+        "step": 7,
+        "completeMs": {
+          "reference": 875.9407289999999,
+          "candidate": 876.5962290000002
+        },
+        "sourceUsableMs": {
+          "reference": 482.2262499999997,
+          "candidate": 482.5927704999999
+        }
+      },
+      {
+        "sequence": "typing",
+        "step": 0,
+        "completeMs": {
+          "reference": 270.52610400000003,
+          "candidate": 269.53556249999997
+        },
+        "sourceUsableMs": {
+          "reference": 62.191479499999986,
+          "candidate": 61.949792
+        }
+      },
+      {
+        "sequence": "typing",
+        "step": 1,
+        "completeMs": {
+          "reference": 248.409146,
+          "candidate": 247.9745835
+        },
+        "sourceUsableMs": {
+          "reference": 47.814333499999975,
+          "candidate": 47.39418749999999
+        }
+      },
+      {
+        "sequence": "typing",
+        "step": 2,
+        "completeMs": {
+          "reference": 242.32297899999998,
+          "candidate": 240.50566700000002
+        },
+        "sourceUsableMs": {
+          "reference": 39.58208349999995,
+          "candidate": 39.43204150000008
+        }
+      },
+      {
+        "sequence": "typing",
+        "step": 3,
+        "completeMs": {
+          "reference": 431.534375,
+          "candidate": 427.55164599999995
+        },
+        "sourceUsableMs": {
+          "reference": 225.61972900000006,
+          "candidate": 226.39472949999993
+        }
+      },
+      {
+        "sequence": "identical-prompt-cache",
+        "step": 0,
+        "completeMs": {
+          "reference": 221.982458,
+          "candidate": 222.3501245
+        },
+        "sourceUsableMs": {
+          "reference": 51.840062500000016,
+          "candidate": 51.926687000000015
+        }
+      },
+      {
+        "sequence": "identical-prompt-cache",
+        "step": 1,
+        "completeMs": {
+          "reference": 35.862750500000004,
+          "candidate": 35.93702099999999
+        },
+        "sourceUsableMs": {
+          "reference": 35.51725050000002,
+          "candidate": 35.6700625
+        }
+      }
+    ]
+  },
+  "fresh_process_cold": {
+    "reference": {
+      "completeMs": 272.22749999999996,
+      "sourceUsableMs": 73.19966699999999
+    },
+    "candidate": {
+      "completeMs": 269.49575,
+      "sourceUsableMs": 73.10658399999998
+    }
+  },
+  "cold_conditions": {
+    "pairs": 3,
+    "all_prompts_and_applied_outputs_equal": true,
+    "fresh_runtime_each_sample": true,
+    "ready_kv_cache_bytes": 0,
+    "weights_loaded_before_timing": true,
+    "runtime_load_timing_excluded": true
+  },
+  "older_installed_runtime": {
+    "revision": "fae6d49d645c9f8877664983102a578ca0b80a0167edbc6a3401980b1ae8ac74",
+    "isolated_copy": true,
+    "warm_cases_matching": 8,
+    "typing_cases_matching": 4,
+    "user_service_touched": false,
+    "sample_limit": "One warm corpus and one typing sequence; supplementary to balanced current-runtime comparisons."
+  },
+  "limitations": [
+    "Four repetitions per case, three fresh-process samples per build; not exhaustive production workload coverage.",
+    "The background user runtime remained resident and was not stopped.",
+    "Model cache contents were not reset between warm sequences; order was balanced two rounds each direction.",
+    "Returned/applicable edits are not synonymous with semantic correctness; shared baseline mistakes are reviewed separately.",
+    "Actual editor presentation remains pending because native focus was not obtained automatically."
+  ]
+}

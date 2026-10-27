@@ -1,0 +1,133 @@
+{
+  "date": "2026-10-27",
+  "method": "Native Computer Use through @oai/sky in VS Code 1.143.1 development windows in the existing Code process; real model service",
+  "referenceExtension": "/Users/costleya/.vscode/extensions/s-obvious.nesweep-1.2.7",
+  "candidateExtension": "/Users/costleya/.codex/worktrees/3d3b/vscode-nes",
+  "workspaceSecurity": "Restricted Mode retained; no workspace trust change",
+  "fixtureBefore": "export function double(value: number) {\n  return value *\n}\n",
+  "typedInput": "space at line 2 column 17",
+  "visibleSuggestion": {
+    "reference": "2;",
+    "candidate": "2;"
+  },
+  "afterTabAndSave": {
+    "reference": "export function double(value: number) {\n  return value * 2;\n}\n",
+    "candidate": "export function double(value: number) {\n  return value * 2;\n}\n"
+  },
+  "manualRequestAfterUndo": {
+    "reference": "2;",
+    "candidate": "2;"
+  },
+  "afterEscapeAndSave": {
+    "reference": "export function double(value: number) {\n  return value * \n}\n",
+    "candidate": "export function double(value: number) {\n  return value * \n}\n"
+  },
+  "dismissalEvidence": "Screenshots confirm no ghost text; accessibility announcement can remain stale after dismissal.",
+  "inputToObservationMs": {
+    "reference": 633,
+    "candidate": 632,
+    "interpretation": "Single automation observation upper bounds, including tool overhead; not exact first-paint measurements or a statistical UI latency comparison."
+  },
+  "scope": "Automatic ghost presentation, Tab acceptance, manual request, Escape dismissal, off-cursor replacement preview and Alt+Tab acceptance. Broader parser/lifecycle/concurrency behavior covered by tests/review; real inference performance in performance-results.json.",
+  "priorFailedTrials": "Isolated app focus harness could not type into intended editor; no product regression inferred because reference positive control also failed. Experimental harness archived, removed from final source.",
+  "cleanup": "Both temporary development windows closed via UI; original Code window preserved. Task-owned runtime PID65680 exited 0. Original model service PID1612 unchanged.",
+  "evidenceFiles": [
+    {
+      "path": "outputs/ui-parity/candidate-accepted.jpeg",
+      "sha256": "edf1ab4360b09d9e565d90a1137d145f67314db28271edbc51f60b9f10f5c928"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-dismissed.jpeg",
+      "sha256": "6d8bfecc5596ec09adeb8db07f60cac370af2731df38801c4b75cc8f9f564c17"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-dismissed.txt",
+      "sha256": "f7c7e646edafb19f05ce46a0827cbe35ae0a248861bb5595b93dfe60cc09da61"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-ghost.jpeg",
+      "sha256": "6d612a74aef26bbf728695851192090071c47ba9f9acaeffbda8d4551a4891cc"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-ghost.txt",
+      "sha256": "083ff7b8ea46fe3be2318002951c8b31bbbb70b98aae2ce294d095dd9b3b7245"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-icon-fixed.jpeg",
+      "sha256": "d368284e723361d04861e0871ad0881a1167b2755a7d830acb78e010329d36fd"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-icon-reload.jpeg",
+      "sha256": "6934518e675352240d65ef0e3053d71faa09925275aab1cfae6e222e489f4b8c"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-jump-accepted.jpeg",
+      "sha256": "b6d242ce0cf96b1f1aa21ec8bbd20db037858d9924e9f625b2c4f540685d2d37"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-jump.jpeg",
+      "sha256": "fb57a8a1794bba356bba8e4353ce6465acc80fa4b39cf08ba7d6d76141288337"
+    },
+    {
+      "path": "outputs/ui-parity/candidate-retrigger.txt",
+      "sha256": "23a79738dcde941aefab696dc5976ecfb19d40b22b34292371b52a6b57646ff2"
+    },
+    {
+      "path": "outputs/ui-parity/experimental-extension-host.tgz",
+      "sha256": "aac1a5ee8f5ea42841ed69e1fd033faa1f0b51b7e2a893e3590ff3c7fd0b05e6"
+    },
+    {
+      "path": "outputs/ui-parity/font-decoder-errors.txt",
+      "sha256": "7d093bd9f3093493f73a41a9874ec913e8d6903872dc4f83186cd589c0bc67dd"
+    },
+    {
+      "path": "outputs/ui-parity/reference-accepted.jpeg",
+      "sha256": "4092d9f9846a48134158334b939fc1defbef3e539c90ad48c08c240b0d1d9b5f"
+    },
+    {
+      "path": "outputs/ui-parity/reference-dismissed.jpeg",
+      "sha256": "c860c87ccece230c800dbd96fe0dedfe891ecf8eab3c4956578008b1cdab2ded"
+    },
+    {
+      "path": "outputs/ui-parity/reference-dismissed.txt",
+      "sha256": "c6cebbe568cd4040cd673320491b918109417119ca952e36099697122d843e6a"
+    },
+    {
+      "path": "outputs/ui-parity/reference-ghost.jpeg",
+      "sha256": "bb4ec7efcb7dc8f356e36f76f1a3b5c0dd9e6f101ac1ba8bc8376fd4c07a91d3"
+    },
+    {
+      "path": "outputs/ui-parity/reference-ghost.txt",
+      "sha256": "ef97c930cd0e24259fbbbede7a8d44708dc2a451e53875603da3a4ad752a7954"
+    },
+    {
+      "path": "outputs/ui-parity/reference-jump-accepted.jpeg",
+      "sha256": "4b7a011cbaf10e80b9405ccdf4b72745bb67f47bef50e8fec6addb13832b1c60"
+    },
+    {
+      "path": "outputs/ui-parity/reference-jump.jpeg",
+      "sha256": "1ecd9cef5eeeeaafa01fb9cdc78bd1d86e7fef36dac64318df30212d380fb35e"
+    },
+    {
+      "path": "outputs/ui-parity/reference-retrigger.txt",
+      "sha256": "99727457b340ed077b4dbcbb0a27de18d85cc9be2e2801ffb117c7f32139cc7f"
+    }
+  ],
+  "offCursorReplacement": {
+    "initial": "export function double(value: number) {\n  return value * 2;\n}\n",
+    "action": "Select parameter value at line 1 columns 24-29 and type input via native UI",
+    "preview": "Both show deletion value and insertion input on line 2, with Alt+Tab acceptance hint",
+    "acceptKey": "Alt+Tab",
+    "accepted": {
+      "reference": "export function double(input: number) {\n  return input * 2;\n}\n",
+      "candidate": "export function double(input: number) {\n  return input * 2;\n}\n"
+    }
+  },
+  "experimentalProposedMode": "Disabled by default. Package requires VS Code Insiders with --enable-proposed-api; not exercised in stable 1.143.1 UI. Adapter and lifecycle contract tests remain separate evidence.",
+  "statusFontRepair": {
+    "observedFailure": "Chromium OTS rejected custom WOFF2 wrapper; missing glyph square",
+    "repair": "Emit validated SFNT directly as nesweep-icons.ttf; same five independent glyphs",
+    "verified": "Real candidate host reload displays N monogram; all five codepoints rasterized using CoreText",
+    "limitation": "Loading animation was not separately captured during brief requests."
+  }
+}
