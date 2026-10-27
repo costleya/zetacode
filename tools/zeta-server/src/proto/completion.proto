@@ -1,0 +1,37 @@
+syntax = "proto3";
+package nesweep;
+
+service CompletionService {
+  rpc Complete(CompletionRequest) returns (stream CompletionEvent);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+message CompletionRequest {
+  string model = 1;
+  string prompt = 2;
+  double temperature = 3;
+  optional double repeat_penalty = 4;
+  optional int32 max_tokens = 5;
+  repeated string stop = 6;
+  bool notify_first_token = 7;
+  bool notify_no_edit_impossible = 8;
+}
+message FirstToken {}
+message NoEditImpossible {}
+message CompletionResult {
+  string text = 1;
+  string finish_reason = 2;
+  optional int32 prompt_eval_count = 3;
+  optional int32 eval_count = 4;
+}
+message CompletionEvent {
+  oneof event {
+    FirstToken first_token = 1;
+    NoEditImpossible no_edit_impossible = 2;
+    CompletionResult final_result = 3;
+  }
+}
+message HealthRequest {}
+message HealthResponse {
+  bool ready = 1;
+  repeated string models = 2;
+}

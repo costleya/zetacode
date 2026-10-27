@@ -6,7 +6,8 @@ export const STOP_TOKENS = ["<|file_sep|>", "</s>"];
 export const DEFAULT_MAX_CONTEXT_FILES = 5;
 
 // Model parameters
-export const MODEL_NAME = "sweepai/sweep-next-edit";
+export const MODEL_NAME = "zeta-2.1";
+export const CONTINUATION_MODEL_NAME = "qwen2.5-coder-7b-instruct";
 export const MAX_TOKENS = 2048;
 export const TEMPERATURE = 0.0;
 

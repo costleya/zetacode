@@ -1,0 +1,159 @@
+{
+  "version": 1,
+  "provenance": "Original synthetic examples authored for this parity harness; no user data or existing repository fixtures.",
+  "cases": [
+    {
+      "id": "typescript-insertion",
+      "language": "typescript",
+      "path": "src/math.ts",
+      "text": "export function double(value: number) {\n  return value * \n}\n",
+      "cursorAfter": "  return value * ",
+      "intent": "complete the multiplication expression"
+    },
+    {
+      "id": "python-existing-suffix",
+      "language": "python",
+      "path": "app.py",
+      "text": "def greet(name):\n    return f\"Hello, {name}\"\n",
+      "cursorAfter": "    return f\"Hello, {name}",
+      "intent": "preserve the closing quote while editing"
+    },
+    {
+      "id": "unicode-offset",
+      "language": "typescript",
+      "path": "src/greeting.ts",
+      "text": "const greeting = 'こんにちは';\nconsole.log(greeting.);\n",
+      "cursorAfter": "console.log(greeting.",
+      "intent": "complete a property after multibyte text"
+    },
+    {
+      "id": "diagnostic-multifile",
+      "language": "typescript",
+      "path": "src/main.ts",
+      "text": "import { total } from './sum';\nconst amount: number = total(['2', '3']);\n",
+      "cursorAfter": "const amount: number = ",
+      "intent": "correct the type mismatch using related context",
+      "diagnostics": [
+        {
+          "line": 2,
+          "severity": "error",
+          "message": "Argument of type string[] is not assignable to number[]"
+        }
+      ],
+      "related": [
+        {
+          "path": "src/sum.ts",
+          "text": "export function total(values: number[]): number {\n  return values.reduce((a, b) => a + b, 0);\n}\n"
+        }
+      ],
+      "rules": "Prefer explicit types and small functions."
+    },
+    {
+      "id": "empty-document",
+      "language": "typescript",
+      "path": "src/empty.ts",
+      "text": "",
+      "cursorAfter": "",
+      "intent": "handle an empty document safely"
+    },
+    {
+      "id": "newline-eof",
+      "language": "python",
+      "path": "check.py",
+      "text": "def is_even(value):\n    return value % 2 == 0\n",
+      "cursorAfter": "    return value % 2 == 0",
+      "intent": "avoid introducing a spurious EOF edit"
+    },
+    {
+      "id": "long-typescript-window",
+      "language": "typescript",
+      "path": "src/large.ts",
+      "text": "export const value000 = 0;\nexport const value001 = 1;\nexport const value002 = 2;\nexport const value003 = 3;\nexport const value004 = 4;\nexport const value005 = 5;\nexport const value006 = 6;\nexport const value007 = 7;\nexport const value008 = 8;\nexport const value009 = 9;\nexport const value010 = 10;\nexport const value011 = 11;\nexport const value012 = 12;\nexport const value013 = 13;\nexport const value014 = 14;\nexport const value015 = 15;\nexport const value016 = 16;\nexport const value017 = 17;\nexport const value018 = 18;\nexport const value019 = 19;\nexport const value020 = 20;\nexport const value021 = 21;\nexport const value022 = 22;\nexport const value023 = 23;\nexport const value024 = 24;\nexport const value025 = 25;\nexport const value026 = 26;\nexport const value027 = 27;\nexport const value028 = 28;\nexport const value029 = 29;\nexport const value030 = 30;\nexport const value031 = 31;\nexport const value032 = 32;\nexport const value033 = 33;\nexport const value034 = 34;\nexport const value035 = 35;\nexport const value036 = 36;\nexport const value037 = 37;\nexport const value038 = 38;\nexport const value039 = 39;\nexport const value040 = 40;\nexport const value041 = 41;\nexport const value042 = 42;\nexport const value043 = 43;\nexport const value044 = 44;\nexport const value045 = 45;\nexport const value046 = 46;\nexport const value047 = 47;\nexport const value048 = 48;\nexport const value049 = 49;\nexport const combined = value049 + ;\nexport const value051 = 51;\nexport const value052 = 52;\nexport const value053 = 53;\nexport const value054 = 54;\nexport const value055 = 55;\nexport const value056 = 56;\nexport const value057 = 57;\nexport const value058 = 58;\nexport const value059 = 59;\nexport const value060 = 60;\nexport const value061 = 61;\nexport const value062 = 62;\nexport const value063 = 63;\nexport const value064 = 64;\nexport const value065 = 65;\nexport const value066 = 66;\nexport const value067 = 67;\nexport const value068 = 68;\nexport const value069 = 69;\nexport const value070 = 70;\nexport const value071 = 71;\nexport const value072 = 72;\nexport const value073 = 73;\nexport const value074 = 74;\nexport const value075 = 75;\nexport const value076 = 76;\nexport const value077 = 77;\nexport const value078 = 78;\nexport const value079 = 79;\nexport const value080 = 80;\nexport const value081 = 81;\nexport const value082 = 82;\nexport const value083 = 83;\nexport const value084 = 84;\nexport const value085 = 85;\nexport const value086 = 86;\nexport const value087 = 87;\nexport const value088 = 88;\nexport const value089 = 89;\nexport const value090 = 90;\nexport const value091 = 91;\nexport const value092 = 92;\nexport const value093 = 93;\nexport const value094 = 94;\nexport const value095 = 95;\nexport const value096 = 96;\nexport const value097 = 97;\nexport const value098 = 98;\nexport const value099 = 99;\n",
+      "cursorAfter": "export const combined = value049 + ",
+      "intent": "complete the expression while retaining context before and after the editable window"
+    },
+    {
+      "id": "long-python-window",
+      "language": "python",
+      "path": "large.py",
+      "text": "def helper_000(value):\n    return value + 0\n\ndef helper_001(value):\n    return value + 1\n\ndef helper_002(value):\n    return value + 2\n\ndef helper_003(value):\n    return value + 3\n\ndef helper_004(value):\n    return value + 4\n\ndef helper_005(value):\n    return value + 5\n\ndef helper_006(value):\n    return value + 6\n\ndef helper_007(value):\n    return value + 7\n\ndef helper_008(value):\n    return value + 8\n\ndef helper_009(value):\n    return value + 9\n\ndef helper_010(value):\n    return value + 10\n\ndef helper_011(value):\n    return value + 11\n\ndef helper_012(value):\n    return value + 12\n\ndef helper_013(value):\n    return value + 13\n\ndef helper_014(value):\n    return value + 14\n\ndef helper_015(value):\n    return value + 15\n\ndef helper_016(value):\n    return value + 16\n\ndef helper_017(value):\n    return value + 17\n\ndef helper_018(value):\n    return value + 18\n\ndef helper_019(value):\n    return value + 19\n\ndef helper_020(value):\n    return value + 20\n\ndef helper_021(value):\n    return value + 21\n\ndef calculate(value):\n    return helper_021(value) + \n\ndef helper_023(value):\n    return value + 23\n\ndef helper_024(value):\n    return value + 24\n\ndef helper_025(value):\n    return value + 25\n\ndef helper_026(value):\n    return value + 26\n\ndef helper_027(value):\n    return value + 27\n\ndef helper_028(value):\n    return value + 28\n\ndef helper_029(value):\n    return value + 29\n\ndef helper_030(value):\n    return value + 30\n\ndef helper_031(value):\n    return value + 31\n\ndef helper_032(value):\n    return value + 32\n\ndef helper_033(value):\n    return value + 33\n\ndef helper_034(value):\n    return value + 34\n\ndef helper_035(value):\n    return value + 35\n\ndef helper_036(value):\n    return value + 36\n\ndef helper_037(value):\n    return value + 37\n\ndef helper_038(value):\n    return value + 38\n\ndef helper_039(value):\n    return value + 39\n\ndef helper_040(value):\n    return value + 40\n\ndef helper_041(value):\n    return value + 41\n\ndef helper_042(value):\n    return value + 42\n\ndef helper_043(value):\n    return value + 43\n\ndef helper_044(value):\n    return value + 44\n",
+      "cursorAfter": "    return helper_021(value) + ",
+      "intent": "complete the expression using context from a long surrounding file"
+    }
+  ],
+  "sequences": [
+    {
+      "id": "cold",
+      "cache": "cold",
+      "steps": [
+        {
+          "case": "typescript-insertion"
+        }
+      ]
+    },
+    {
+      "id": "warm",
+      "cache": "warm",
+      "steps": [
+        {
+          "case": "typescript-insertion"
+        },
+        {
+          "case": "diagnostic-multifile"
+        },
+        {
+          "case": "unicode-offset"
+        },
+        {
+          "case": "python-existing-suffix"
+        },
+        {
+          "case": "empty-document"
+        },
+        {
+          "case": "newline-eof"
+        },
+        {
+          "case": "long-typescript-window"
+        },
+        {
+          "case": "long-python-window"
+        }
+      ]
+    },
+    {
+      "id": "identical-prompt-cache",
+      "cache": "warm",
+      "steps": [
+        {
+          "case": "typescript-insertion"
+        },
+        {
+          "case": "typescript-insertion"
+        }
+      ]
+    },
+    {
+      "id": "typing",
+      "cache": "warm",
+      "steps": [
+        {
+          "case": "typescript-insertion",
+          "insert": "v"
+        },
+        {
+          "case": "typescript-insertion",
+          "insert": "va"
+        },
+        {
+          "case": "typescript-insertion",
+          "insert": "val"
+        },
+        {
+          "case": "typescript-insertion",
+          "insert": "val."
+        }
+      ]
+    }
+  ]
+}
