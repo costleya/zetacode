@@ -1,0 +1,17 @@
+# Lifecycle commands for task-owned daemons in this trusted repository.
+prefix_rule(
+    pattern = ["vitest-daemon", ["start", "status", "snapshot", "output", "stop"]],
+    decision = "allow",
+    justification = "Manage or inspect named, task-owned Vitest watcher daemons.",
+    match = [
+        "vitest-daemon start task-unit",
+        "vitest-daemon status task-unit",
+        "vitest-daemon snapshot task-unit --json",
+        "vitest-daemon output task-unit",
+        "vitest-daemon stop task-unit",
+    ],
+    not_match = [
+        "vitest-daemon publish",
+        "vitest-daemon install",
+    ],
+)

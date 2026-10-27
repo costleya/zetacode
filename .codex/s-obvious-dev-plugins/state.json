@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "scope": "repo",
+  "options": {
+    "hooks": true,
+    "integrations": [
+      "serena"
+    ]
+  },
+  "plugin": "s-obvious-dev-plugins",
+  "version": "0.2.0",
+  "templateRevision": "06eb7628449eb6282fdc537ff7f9acffeedcf5aaf3224b24793112d1d393fb4c",
+  "revisions": {
+    "vitest-daemon": {
+      "url": "https://github.com/costleya/vitest-daemon.git",
+      "revision": "0b75e27632bd0a03c60ea578e7005a66b2b49287"
+    },
+    "serena-shared-mcp": {
+      "url": "https://github.com/costleya/serena-shared-mcp.git",
+      "revision": "09a1f07303a7fafc2c9038ab06f53482641edcaa"
+    }
+  },
+  "files": [
+    {
+      "file": ".codex/rules/vitest-daemon.rules",
+      "sha256": "830322d4d6d6b6eb330d63dc2ea70dc5d1c95a9bb63bff685fe9331d8abc2b71"
+    },
+    {
+      "file": ".codex/rules/colgrep.rules",
+      "sha256": "8eaa764ccf95adfd8233b2f0728bbaa4db431a61383f6d756f5f540d08253582"
+    }
+  ],
+  "blocks": [
+    {
+      "file": ".codex/config.toml",
+      "content": "\n# BEGIN s-obvious-dev-plugins mcp_servers.serena\n[mcp_servers.serena]\ncommand = \"node\"\nstartup_timeout_sec = 60\nargs = [\"-e\",\"const p=require('node:path');const h=require('node:os').homedir();import(require('node:url').pathToFileURL(p.join(h,'.local','share','s-obvious-dev-plugins','mcp-runtime','scripts','mcp-launch.mjs')).href).catch(e=>{console.error(e.message+'. Run the plugin bootstrap or global update command to install the shared runtime.');process.exitCode=1})\",\"mcp-launch\",\"serena\"]\n# END s-obvious-dev-plugins mcp_servers.serena\n"
+    },
+    {
+      "file": ".codex/config.toml",
+      "content": "\n# BEGIN s-obvious-dev-plugins navigation-hooks\n[[hooks.SessionStart]]\n[[hooks.SessionStart.hooks]]\ntype = \"command\"\ntimeout = 5\ncommand = \"node -e 'const p=require('\\\\''node:path'\\\\'');const h=require('\\\\''node:os'\\\\'').homedir();import(require('\\\\''node:url'\\\\'').pathToFileURL(p.join(h,'\\\\''.local'\\\\'','\\\\''share'\\\\'','\\\\''s-obvious-dev-plugins'\\\\'','\\\\''mcp-runtime'\\\\'','\\\\''scripts'\\\\'','\\\\''navigation-hook.mjs'\\\\'')).href).catch(e=>{console.error(e.message+'\\\\''. Run the plugin bootstrap or global update command to install the shared runtime.'\\\\'');process.exitCode=1})'\"\n\n[[hooks.SubagentStart]]\n[[hooks.SubagentStart.hooks]]\ntype = \"command\"\ntimeout = 5\ncommand = \"node -e 'const p=require('\\\\''node:path'\\\\'');const h=require('\\\\''node:os'\\\\'').homedir();import(require('\\\\''node:url'\\\\'').pathToFileURL(p.join(h,'\\\\''.local'\\\\'','\\\\''share'\\\\'','\\\\''s-obvious-dev-plugins'\\\\'','\\\\''mcp-runtime'\\\\'','\\\\''scripts'\\\\'','\\\\''navigation-hook.mjs'\\\\'')).href).catch(e=>{console.error(e.message+'\\\\''. Run the plugin bootstrap or global update command to install the shared runtime.'\\\\'');process.exitCode=1})'\"\n\n[[hooks.SubagentStop]]\n[[hooks.SubagentStop.hooks]]\ntype = \"command\"\ntimeout = 5\ncommand = \"node -e 'const p=require('\\\\''node:path'\\\\'');const h=require('\\\\''node:os'\\\\'').homedir();import(require('\\\\''node:url'\\\\'').pathToFileURL(p.join(h,'\\\\''.local'\\\\'','\\\\''share'\\\\'','\\\\''s-obvious-dev-plugins'\\\\'','\\\\''mcp-runtime'\\\\'','\\\\''scripts'\\\\'','\\\\''navigation-hook.mjs'\\\\'')).href).catch(e=>{console.error(e.message+'\\\\''. Run the plugin bootstrap or global update command to install the shared runtime.'\\\\'');process.exitCode=1})'\"\n\n[[hooks.SessionEnd]]\n[[hooks.SessionEnd.hooks]]\ntype = \"command\"\ntimeout = 3\ncommand = \"node -e 'const p=require('\\\\''node:path'\\\\'');const h=require('\\\\''node:os'\\\\'').homedir();import(require('\\\\''node:url'\\\\'').pathToFileURL(p.join(h,'\\\\''.local'\\\\'','\\\\''share'\\\\'','\\\\''s-obvious-dev-plugins'\\\\'','\\\\''mcp-runtime'\\\\'','\\\\''scripts'\\\\'','\\\\''navigation-hook.mjs'\\\\'')).href).catch(e=>{console.error(e.message+'\\\\''. Run the plugin bootstrap or global update command to install the shared runtime.'\\\\'');process.exitCode=1})'\"\n# END s-obvious-dev-plugins navigation-hooks\n"
+    },
+    {
+      "file": "AGENTS.md",
+      "content": "\n<!-- BEGIN s-obvious-dev-plugins -->\n### Code navigation\n\nChoose the first substantive discovery action by the requested operation, not just the topic's wording. Reading applicable AGENTS.md instructions, activating the checkout, and checking tool availability are prerequisites, not discovery. For the matching task, use the selected tool before searching with an alternative:\n\nFor semantic or structural discovery, start the selected tool at the repository root using its path argument; do not enumerate the source tree to choose a starting directory. Source-tree listings (`ls`, `find`, or `rg --files`) and searches for guessed implementation keywords are substantive discovery, not prerequisites, and must not precede colgrep or ast-grep on their matching routes. Prerequisite reads may inspect applicable instruction files, tool availability, or the specific configuration needed to invoke the tool; keep them focused and do not include source enumeration. A request whose actual goal is literal text or file discovery still starts with `rg`.\n\n- Implementation discovery by meaning when the path and symbol are unknown: start with colgrep semantic discovery, then verify its candidates with focused literal searches or source reads. Use colgrep instead of Serena or `rg` for this initial discovery; a known concept is not a known symbol or literal. This route does not apply to declaration, caller, or reference tracing for a user-named identifier.\n- Repeated syntactic shapes or sibling implementation audits expressible as AST patterns: start with ast-grep structural search before regex search. Use ast-grep instead of Serena or `rg` for this initial discovery; knowing one example does not make a syntax audit a literal search. Symbol identity, calls, references, and type relationships remain Serena tasks.\n- Known symbols, their definitions/bodies, callers, or references: start with Serena in the selected checkout. A user-named identifier is a known symbol when the request asks to trace its declaration, importing callers, usages, or conditions along its call path; an unknown file location does not make that a semantic discovery task. Locate the named symbol with Serena first, then inspect its references and relevant source bodies rather than rediscovering it with colgrep.\n- Known strings, config keys, log text, or file names/paths: start with ripgrep (`rg`); use `rg --files` for file discovery. Literal text and file searches remain `rg` tasks.\n- JSON structure, values, or filtering: use jq rather than plain-text search.\n\nOn macOS, run Colgrep with explicit subcommands and the repository root: `colgrep search QUERY ROOT` for semantic discovery and `colgrep init ROOT` for initialization. Request execution outside the sandbox (`sandbox_permissions: \"require_escalated\"` when using `exec_command`) on the first attempt for both commands. The managed `.codex/rules/colgrep.rules` authorizes these prefixes in a trusted repository; it does not select the execution boundary. Keep normal acceleration defaults; do not force CPU to work around sandbox GPU restrictions. Honor an explicit user request for CPU execution. An optional `--force-gpu` check may verify GPU access.\n\nKeep Colgrep's normal automatic incremental index updates enabled on every search. Do not add `--no-update` to regular navigation or rely on a prebuilt index staying current. Controlled evaluation benchmarks may use their own isolated index policy.\n\nIf the selected tool fails, is unavailable, or cannot express the task, briefly state the actual reason and use a focused available fallback. Do not perform a token tool call after discovering the answer with the wrong tool. A missing tool affects only its matching route; keep using the other routes. Do not install or bootstrap tools automatically. Install missing tools only through explicitly requested `$s-obvious-dev-setup`.\n\nAn empty result is not a tool failure or proof of inapplicability. When the source language is unknown, omit `--lang` initially so ast-grep infers it from file extensions instead of guessing a language that excludes source. Before switching tools after an empty ast-grep result, use `--inspect summary` to distinguish zero scanned files from scanned files with no matches. For zero scanned files, correct path, language, or ignore configuration using tool diagnostics and focused known configuration. For scanned files with no matches, simplify or broaden the AST pattern within the relevant scope. If a valid structural search still yields no matches, report that evidence and explain why a focused source read or literal fallback is needed. Do not use an empty probe to justify doing the initial structural discovery with regex or source enumeration.\n<!-- END s-obvious-dev-plugins -->\n"
+    }
+  ],
+  "createdContainers": [
+    "AGENTS.md",
+    ".codex/config.toml"
+  ]
+}

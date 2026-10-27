@@ -1,0 +1,33 @@
+
+# BEGIN s-obvious-dev-plugins mcp_servers.serena
+[mcp_servers.serena]
+command = "node"
+startup_timeout_sec = 60
+args = ["-e","const p=require('node:path');const h=require('node:os').homedir();import(require('node:url').pathToFileURL(p.join(h,'.local','share','s-obvious-dev-plugins','mcp-runtime','scripts','mcp-launch.mjs')).href).catch(e=>{console.error(e.message+'. Run the plugin bootstrap or global update command to install the shared runtime.');process.exitCode=1})","mcp-launch","serena"]
+# END s-obvious-dev-plugins mcp_servers.serena
+
+# BEGIN s-obvious-dev-plugins navigation-hooks
+[[hooks.SessionStart]]
+[[hooks.SessionStart.hooks]]
+type = "command"
+timeout = 5
+command = "node -e 'const p=require('\\''node:path'\\'');const h=require('\\''node:os'\\'').homedir();import(require('\\''node:url'\\'').pathToFileURL(p.join(h,'\\''.local'\\'','\\''share'\\'','\\''s-obvious-dev-plugins'\\'','\\''mcp-runtime'\\'','\\''scripts'\\'','\\''navigation-hook.mjs'\\'')).href).catch(e=>{console.error(e.message+'\\''. Run the plugin bootstrap or global update command to install the shared runtime.'\\'');process.exitCode=1})'"
+
+[[hooks.SubagentStart]]
+[[hooks.SubagentStart.hooks]]
+type = "command"
+timeout = 5
+command = "node -e 'const p=require('\\''node:path'\\'');const h=require('\\''node:os'\\'').homedir();import(require('\\''node:url'\\'').pathToFileURL(p.join(h,'\\''.local'\\'','\\''share'\\'','\\''s-obvious-dev-plugins'\\'','\\''mcp-runtime'\\'','\\''scripts'\\'','\\''navigation-hook.mjs'\\'')).href).catch(e=>{console.error(e.message+'\\''. Run the plugin bootstrap or global update command to install the shared runtime.'\\'');process.exitCode=1})'"
+
+[[hooks.SubagentStop]]
+[[hooks.SubagentStop.hooks]]
+type = "command"
+timeout = 5
+command = "node -e 'const p=require('\\''node:path'\\'');const h=require('\\''node:os'\\'').homedir();import(require('\\''node:url'\\'').pathToFileURL(p.join(h,'\\''.local'\\'','\\''share'\\'','\\''s-obvious-dev-plugins'\\'','\\''mcp-runtime'\\'','\\''scripts'\\'','\\''navigation-hook.mjs'\\'')).href).catch(e=>{console.error(e.message+'\\''. Run the plugin bootstrap or global update command to install the shared runtime.'\\'');process.exitCode=1})'"
+
+[[hooks.SessionEnd]]
+[[hooks.SessionEnd.hooks]]
+type = "command"
+timeout = 3
+command = "node -e 'const p=require('\\''node:path'\\'');const h=require('\\''node:os'\\'').homedir();import(require('\\''node:url'\\'').pathToFileURL(p.join(h,'\\''.local'\\'','\\''share'\\'','\\''s-obvious-dev-plugins'\\'','\\''mcp-runtime'\\'','\\''scripts'\\'','\\''navigation-hook.mjs'\\'')).href).catch(e=>{console.error(e.message+'\\''. Run the plugin bootstrap or global update command to install the shared runtime.'\\'');process.exitCode=1})'"
+# END s-obvious-dev-plugins navigation-hooks

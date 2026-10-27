@@ -1,0 +1,27 @@
+# Search and initialize indexes outside the sandbox in this trusted repository.
+prefix_rule(
+    pattern = ["colgrep", ["search", "init"]],
+    decision = "allow",
+    justification = "Run repository semantic search and incremental indexing with macOS GPU access and Colgrep's external index cache.",
+    match = [
+        "colgrep search 'authentication flow' /path/to/repository",
+        "colgrep search 'authentication flow' /path/to/repository --force-gpu",
+        "colgrep search 'authentication flow' /path/to/repository --force-cpu",
+        "colgrep init /path/to/repository",
+        "colgrep init /path/to/repository --force-gpu",
+    ],
+    not_match = [
+        "colgrep 'authentication flow' /path/to/repository",
+        "colgrep clear",
+        "colgrep update",
+        "colgrep set-model model-name",
+        "colgrep install",
+        "colgrep uninstall",
+        "colgrep --install-codex",
+        "colgrep --uninstall-codex",
+        "colgrep --install-claude-code",
+        "colgrep --uninstall",
+        "colgrep --force-gpu update",
+        "colgrep --force-cpu clear",
+    ],
+)
