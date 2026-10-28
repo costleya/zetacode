@@ -1,0 +1,296 @@
+{
+  "name": "nesweep",
+  "displayName": "NESweep autocompletion",
+  "version": "1.2.7",
+  "private": true,
+  "description": "Next Edit Autocomplete using Zeta-2.1.",
+  "categories": [
+    "AI",
+    "Other"
+  ],
+  "homepage": "https://github.com/costleya/vscode-nes#readme",
+  "bugs": {
+    "url": "https://github.com/costleya/vscode-nes/issues"
+  },
+  "license": "GPL-3.0-or-later",
+  "author": {
+    "name": "Aaron Costley"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/costleya/vscode-nes"
+  },
+  "publisher": "s-obvious",
+  "main": "./out/extension.mjs",
+  "scripts": {
+    "build": "vp pack",
+    "typecheck": "vp lint --type-check",
+    "lint": "vp check",
+    "fix": "vp check --fix",
+    "format": "vp fmt",
+    "format:check": "vp fmt --check",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "^2.16.0",
+    "@grpc/grpc-js": "^1.14.6",
+    "@opentelemetry/api": "1.10.0",
+    "@opentelemetry/core": "2.12.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "0.223.0",
+    "@opentelemetry/resources": "2.12.0",
+    "@opentelemetry/sdk-trace": "2.12.0",
+    "diff": "^9.0.0",
+    "zod": "4.3.6"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/vscode": "1.140.0",
+    "@vscode/vsce": "^3.9.1",
+    "pyright": "1.1.414",
+    "ts-proto": "^2.18.1",
+    "vite-plus": "catalog:"
+  },
+  "contributes": {
+    "icons": {
+      "nesweep-idle": {
+        "description": "NESweep idle",
+        "default": {
+          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontCharacter": "\\ea01"
+        }
+      },
+      "nesweep-load-1": {
+        "description": "NESweep loading 1",
+        "default": {
+          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontCharacter": "\\ea02"
+        }
+      },
+      "nesweep-load-2": {
+        "description": "NESweep loading 2",
+        "default": {
+          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontCharacter": "\\ea03"
+        }
+      },
+      "nesweep-load-3": {
+        "description": "NESweep loading 3",
+        "default": {
+          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontCharacter": "\\ea04"
+        }
+      },
+      "nesweep-load-4": {
+        "description": "NESweep loading 4",
+        "default": {
+          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontCharacter": "\\ea05"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "sweep.triggerNextEdit",
+        "title": "NESweep: Request Suggestion"
+      },
+      {
+        "command": "sweep.toggleEnabled",
+        "title": "NESweep: Toggle Suggestions"
+      },
+      {
+        "command": "sweep.showMenu",
+        "title": "NESweep: Open Menu"
+      },
+      {
+        "command": "sweep.acceptInlineEdit",
+        "title": "NESweep: Accept Inline Edit"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "editor.action.inlineSuggest.commit",
+        "key": "alt+tab",
+        "when": "editorTextFocus && inlineSuggestionVisible && suggestWidgetVisible && !editorHasSelection && !inSnippetMode"
+      },
+      {
+        "command": "editor.action.inlineSuggest.commit",
+        "key": "alt+l",
+        "when": "isLinux && editorTextFocus && inlineSuggestionVisible && suggestWidgetVisible && !editorHasSelection && !inSnippetMode"
+      },
+      {
+        "command": "editor.action.inlineSuggest.hide",
+        "key": "escape",
+        "when": "editorTextFocus && inlineSuggestionVisible && !suggestWidgetVisible"
+      }
+    ],
+    "configuration": [
+      {
+        "title": "NESweep: General",
+        "order": 10,
+        "properties": {
+          "sweep.enabled": {
+            "type": "boolean",
+            "default": true,
+            "order": 10,
+            "scope": "window",
+            "markdownDescription": "Enable next-edit suggestions."
+          },
+          "sweep.maxContextFiles": {
+            "type": "number",
+            "default": 5,
+            "order": 100,
+            "minimum": 0,
+            "markdownDescription": "Maximum related files used for context."
+          },
+          "sweep.outlineSymbols": {
+            "type": "number",
+            "default": 0,
+            "order": 140,
+            "minimum": 0,
+            "markdownDescription": "Maximum nearby document symbols included; zero disables outlines."
+          },
+          "sweep.maxEditHistory": {
+            "type": "number",
+            "default": 15,
+            "order": 110,
+            "minimum": 1,
+            "markdownDescription": "Maximum recent edit records included."
+          },
+          "sweep.maxRecentChangesChars": {
+            "type": "number",
+            "default": 12000,
+            "order": 120,
+            "minimum": 0,
+            "markdownDescription": "Character limit for recent edits; zero omits them."
+          },
+          "sweep.includeClipboardContext": {
+            "type": "boolean",
+            "default": true,
+            "order": 130,
+            "markdownDescription": "Include clipboard text in retrieval context."
+          },
+          "sweep.stableRetrievalOrdering": {
+            "type": "boolean",
+            "default": false,
+            "order": 170,
+            "markdownDescription": "Sort equivalent retrieval results consistently."
+          },
+          "sweep.reuseIdenticalPromptResults": {
+            "type": "boolean",
+            "default": false,
+            "order": 180,
+            "markdownDescription": "Reuse recent results for identical prompts."
+          },
+          "sweep.identicalPromptCacheTtlMs": {
+            "type": "number",
+            "default": 5000,
+            "order": 190,
+            "minimum": 0,
+            "markdownDescription": "Lifetime of cached identical-prompt results in milliseconds."
+          },
+          "sweep.autocompleteExclusionPatterns": {
+            "type": "array",
+            "order": 50,
+            "items": {
+              "type": "string"
+            },
+            "default": [
+              "**/.env*",
+              "**/*.pem",
+              "**/*.key",
+              "**/*.cert",
+              "**/*.crt",
+              "**/.dev.vars",
+              "**/secrets.yml"
+            ],
+            "markdownDescription": "File patterns excluded from suggestion requests."
+          },
+          "sweep.autocompleteSnoozeUntil": {
+            "type": "number",
+            "default": 0,
+            "order": 60,
+            "markdownDescription": "Pause suggestions until this Unix timestamp in milliseconds."
+          },
+          "sweep.completionTimeoutMs": {
+            "type": "number",
+            "default": 10000,
+            "order": 40,
+            "markdownDescription": "Request deadline in milliseconds."
+          },
+          "sweep.retriggerOnContextExit": {
+            "type": "boolean",
+            "default": false,
+            "order": 45,
+            "markdownDescription": "Request another suggestion when the cursor leaves the previous editable window."
+          },
+          "sweep.contextExitRetriggerDebounceMs": {
+            "type": "number",
+            "default": 1500,
+            "minimum": 0,
+            "order": 46,
+            "markdownDescription": "Delay after cursor movement before requesting again."
+          },
+          "sweep.diagRadius": {
+            "type": "number",
+            "default": 12,
+            "order": 160,
+            "markdownDescription": "Maximum line distance for diagnostics; zero disables filtering."
+          },
+          "sweep.injectInlineDiagnostics": {
+            "type": "boolean",
+            "default": false,
+            "order": 230,
+            "markdownDescription": "Place diagnostics next to source lines instead of in a separate section."
+          },
+          "sweep.inlineDiagnosticsMarker": {
+            "type": "string",
+            "default": "BUG: LSP error here",
+            "order": 240,
+            "markdownDescription": "Marker used to identify injected diagnostic comments."
+          },
+          "sweep.diagnosticsMessageTransforms": {
+            "type": "object",
+            "order": 250,
+            "default": {},
+            "markdownDescription": "Case-insensitive regular expression replacements for diagnostic messages.",
+            "additionalProperties": {
+              "type": "string",
+              "description": "Replacement text, with $1 and similar capture references."
+            }
+          }
+        }
+      },
+      {
+        "title": "NESweep: Active File Context",
+        "order": 20,
+        "properties": {
+          "sweep.editableTokens": {
+            "type": "number",
+            "default": 350,
+            "order": 10,
+            "minimum": 1,
+            "markdownDescription": "Approximate token budget for the editable current-file excerpt."
+          },
+          "sweep.zetaContextTokens": {
+            "type": "number",
+            "default": 150,
+            "order": 20,
+            "minimum": 0,
+            "markdownDescription": "Approximate token budget for surrounding current-file context."
+          }
+        }
+      }
+    ]
+  },
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "icon": "assets/nesweep.png",
+  "engines": {
+    "vscode": "^1.142.0"
+  },
+  "packageManager": "pnpm@12.8.1",
+  "enabledApiProposals": [
+    "inlineCompletionsAdditions"
+  ]
+}

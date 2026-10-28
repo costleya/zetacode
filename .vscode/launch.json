@@ -6,10 +6,10 @@
       "type": "extensionHost",
       "request": "launch",
       "args": [
-        "--extensionDevelopmentPath=${workspaceFolder}",
+        "--extensionDevelopmentPath=${workspaceFolder}/extension",
         "--enable-proposed-api=s-obvious.nesweep"
       ],
-      "outFiles": ["${workspaceFolder}/out/**/*.mjs"],
+      "outFiles": ["${workspaceFolder}/extension/out/**/*.mjs"],
       "preLaunchTask": "Build extension"
     }
   ]

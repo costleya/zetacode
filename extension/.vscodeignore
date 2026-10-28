@@ -1,0 +1,8 @@
+src/**
+node_modules/**
+test/**
+vite.config.ts
+tsconfig.json
+**/*.map
+**/__pycache__/**
+**/*.{pyc,pyo}

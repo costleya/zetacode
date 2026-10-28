@@ -1,5 +1,6 @@
 # dependencies
 node_modules
+.pnpm-store/
 
 # output
 out
@@ -36,7 +37,7 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Local tools and extension packages
 .serena/
 *.vsix
-**/.venv/
+**/.venv
 
 # Generated runtime and verification artifacts
 __pycache__/

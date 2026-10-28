@@ -1,3 +1,13 @@
+supportedArchitectures:
+  - darwin-arm64
+python:
+  enabled: true
+  versions: ["3.13"]
+  groups: [codegen]
+packages:
+  - extension
+  - server
+
 allowBuilds:
   "@vscode/vsce-sign": false
   keytar: false

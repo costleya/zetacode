@@ -1,0 +1,6 @@
+supportedArchitectures:
+  - darwin-arm64
+python:
+  enabled: true
+  versions: ["3.13"]
+  groups: [codegen]

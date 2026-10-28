@@ -1,14 +1,14 @@
 {
-  "include": ["tools/zeta-server/src"],
+  "include": ["server/src"],
   "exclude": [
-    "tools/zeta-server/src/completion_pb2.py",
-    "tools/zeta-server/src/completion_pb2_grpc.py",
-    "tools/zeta-server/src/completion_pb2.pyi"
+    "server/src/completion_pb2.py",
+    "server/src/completion_pb2_grpc.py",
+    "server/src/completion_pb2.pyi"
   ],
   "typeCheckingMode": "strict",
   "pythonVersion": "3.13",
   "pythonPlatform": "Darwin",
-  "venvPath": "tools/zeta-server",
+  "venvPath": "server",
   "venv": ".venv",
-  "stubPath": "tools/zeta-server/typings"
+  "stubPath": "server/typings"
 }
