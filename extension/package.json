@@ -8,9 +8,9 @@
     "AI",
     "Other"
   ],
-  "homepage": "https://github.com/costleya/vscode-nes#readme",
+  "homepage": "https://github.com/costleya/zetacode#readme",
   "bugs": {
-    "url": "https://github.com/costleya/vscode-nes/issues"
+    "url": "https://github.com/costleya/zetacode/issues"
   },
   "license": "GPL-3.0-or-later",
   "author": {
@@ -18,7 +18,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/costleya/vscode-nes"
+    "url": "https://github.com/costleya/zetacode"
   },
   "publisher": "costleya",
   "main": "./out/extension.mjs",
