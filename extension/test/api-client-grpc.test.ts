@@ -161,10 +161,10 @@ test.each(["transport error", "deadline"] as const)(
       });
       expect(result).toBeNull();
       const spans = exporter.getFinishedSpans();
-      const api = spans.filter((span) => span.name === "nesweep.api.autocomplete");
+      const api = spans.filter((span) => span.name === "zetacode.api.autocomplete");
       expect(api).toHaveLength(1);
       expect(api[0]!.ended).toBe(true);
-      expect(api[0]!.attributes["nesweep.outcome"]).toBe("error");
+      expect(api[0]!.attributes["zetacode.outcome"]).toBe("error");
       expect(api[0]!.status.code).toBe(SpanStatusCode.ERROR);
       expect(
         JSON.stringify(

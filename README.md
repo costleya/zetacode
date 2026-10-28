@@ -1,10 +1,10 @@
-# NESweep
+# zetacode
 
 Local next-edit suggestions and fill-in-the-middle completions for Visual Studio Code. The extension uses Zeta 2.1 and Qwen with a managed local model service on Apple Silicon.
 
 ## Native inline edits
 
-NESweep requires a VS Code version with native inline edit support. If your version requires proposed API access for this capability, use VS Code Insiders and start it with `--enable-proposed-api=s-obvious.nesweep`. See [Using Proposed API](https://code.visualstudio.com/api/advanced-topics/using-proposed-api) for setup options. If the API becomes available without proposed access, no flag is needed.
+zetacode requires a VS Code version with native inline edit support. If your version requires proposed API access for this capability, use VS Code Insiders and start it with `--enable-proposed-api=costleya.zetacode`. See [Using Proposed API](https://code.visualstudio.com/api/advanced-topics/using-proposed-api) for setup options. If the API becomes available without proposed access, no flag is needed.
 
 ## Development
 
@@ -22,9 +22,9 @@ Launch the extension with the included VS Code development configuration. The mo
 
 ## Acknowledgments
 
-NESweep builds on [vscode-nes by Sweep AI and its contributors](https://github.com/sweepai/vscode-nes), with further development by Aaron Costley. It uses [Zeta 2.1, developed by Zed Industries](https://huggingface.co/zed-industries/zeta-2.1), for next-edit prediction.
+zetacode builds on [vscode-nes by Sweep AI and its contributors](https://github.com/sweepai/vscode-nes), with further development by Aaron Costley. It uses [Zeta 2.1, developed by Zed Industries](https://huggingface.co/zed-industries/zeta-2.1), for next-edit prediction.
 
-[SR_Team's vscode-nes fork](https://github.com/sr-tream/vscode-nes) inspired Aaron to develop NESweep. This project was rebuilt from Sweep AI's original repository without incorporating SR_Team's changes or Git history.
+[SR_Team's vscode-nes fork](https://github.com/sr-tream/vscode-nes) inspired Aaron to develop zetacode. This project was rebuilt from Sweep AI's original repository without incorporating SR_Team's changes or Git history.
 
 ## License
 

@@ -169,7 +169,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
 
     const suppressionReason = await this.getSuppressionReason(document);
     if (suppressionReason) {
-      console.log("[Sweep] Suppressing inline edit:", suppressionReason);
+      console.log("[zetacode] Suppressing inline edit:", suppressionReason);
       return undefined;
     }
 
@@ -192,7 +192,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
     const originalContent = this.tracker.getOriginalContent(uri) ?? currentContent;
 
     if (isFileTooLarge(currentContent) || isFileTooLarge(originalContent)) {
-      console.log("[Sweep] Skipping inline edit: file too large", {
+      console.log("[zetacode] Skipping inline edit: file too large", {
         uri,
         currentLength: currentContent.length,
         originalLength: originalContent.length,
@@ -247,7 +247,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
           ? trace.setSpan(ROOT_CONTEXT, completionSpan)
           : ROOT_CONTEXT;
         const buildSpan = this.telemetry?.tracer?.startSpan(
-          "nesweep.provider.build_input",
+          "zetacode.provider.build_input",
           undefined,
           parentContext,
         );
@@ -319,7 +319,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
       }
 
       if (this.isRequestStale(requestSnapshot, token)) {
-        console.log("[Sweep] Inline edit response stale; skipping render", {
+        console.log("[zetacode] Inline edit response stale; skipping render", {
           uri,
           requestVersion: requestSnapshot.version,
           currentVersion: document.version,
@@ -334,7 +334,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
       if (this.isRequestStale(requestSnapshot, token) || !this.isLatestRequest(requestId))
         return undefined;
       if (renderSuppressionReason) {
-        console.log("[Sweep] Suppressing inline edit render:", renderSuppressionReason);
+        console.log("[zetacode] Suppressing inline edit render:", renderSuppressionReason);
         return undefined;
       }
 
@@ -360,7 +360,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
       }
       this.setSuggestionQueue(uri, routedResults.slice(1));
 
-      console.log("[Sweep] Rendering inline edit suggestions", {
+      console.log("[zetacode] Rendering inline edit suggestions", {
         count: inlineResults.length,
         cursorLine: position.line,
         firstEditStartLine: document.positionAt(firstInlineResult.startIndex).line,
@@ -375,7 +375,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
         return undefined;
       }
       if (buildingInput) throw error;
-      console.error("[Sweep] InlineEditProvider error:", error);
+      console.error("[zetacode] InlineEditProvider error:", error);
       return undefined;
     } finally {
       cancellation?.dispose();
@@ -477,7 +477,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
         normalizedResult,
       );
       if (classification.decision === "SUPPRESS") {
-        console.log("[Sweep] Suppressing suggestion after display classification", {
+        console.log("[zetacode] Suppressing suggestion after display classification", {
           reason: classification.reason,
           id: normalizedResult.id,
         });
@@ -536,7 +536,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
 
   private cancelInFlightRequest(reason: string): void {
     if (!this.inFlightRequest) return;
-    console.log("[Sweep] Cancelling in-flight inline edit request:", reason);
+    console.log("[zetacode] Cancelling in-flight inline edit request:", reason);
     this.inFlightRequest.controller.abort();
     this.inFlightRequest = null;
   }
@@ -792,7 +792,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
     const endPosition = document.positionAt(result.endIndex);
     const editRange = new vscode.Range(startPosition, endPosition);
 
-    console.log("[Sweep] Creating inline edit:", {
+    console.log("[zetacode] Creating inline edit:", {
       id: result.id,
       startPosition: `${startPosition.line}:${startPosition.character}`,
       endPosition: `${endPosition.line}:${endPosition.character}`,
@@ -847,8 +847,8 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
       };
     } else this.proposedNavigation = null;
     item.command = {
-      title: "Accept Sweep Inline Edit",
-      command: "sweep.acceptInlineEdit",
+      title: "Accept zetacode Inline Edit",
+      command: "zetacode.acceptInlineEdit",
       arguments: [metricsPayload, acceptedSuggestion],
     };
 
@@ -917,7 +917,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
     if (!this.lastInlineEdit) return;
     const currentUri = document.uri.toString();
     if (currentUri !== this.lastInlineEdit.uri) {
-      console.log("[Sweep] Clearing inline edit: active document changed");
+      console.log("[zetacode] Clearing inline edit: active document changed");
       this.clearInlineEdit("active document changed");
       return;
     }
@@ -947,7 +947,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
       position.character !== this.lastInlineEdit.character ||
       document.version !== this.lastInlineEdit.version
     ) {
-      console.log("[Sweep] Clearing inline edit: cursor moved away", {
+      console.log("[zetacode] Clearing inline edit: cursor moved away", {
         originalLine: this.lastInlineEdit.line,
         currentLine: position.line,
         originalCharacter: this.lastInlineEdit.character,
@@ -1021,7 +1021,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
     }
 
     if (reason) {
-      console.log("[Sweep] Inline edit cleared:", reason);
+      console.log("[zetacode] Inline edit cleared:", reason);
     }
   }
 
@@ -1040,7 +1040,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
     this.queuedSuggestions = null;
     this.shouldConsumeQueuedSuggestion = false;
     if (reason && hadQueuedSuggestions) {
-      console.log("[Sweep] Cleared queued suggestions:", reason);
+      console.log("[zetacode] Cleared queued suggestions:", reason);
     }
   }
 
@@ -1072,7 +1072,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
         continue;
       }
       if (classification.decision === "JUMP") {
-        console.log("[Sweep] Rendering queued suggestion as jump edit", {
+        console.log("[zetacode] Rendering queued suggestion as jump edit", {
           id: normalized.id,
           remaining: queue.suggestions.length,
         });
@@ -1080,7 +1080,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
         return this.buildCompletionItem(document, position, normalized, true);
       }
 
-      console.log("[Sweep] Rendering queued inline edit suggestion", {
+      console.log("[zetacode] Rendering queued inline edit suggestion", {
         id: normalized.id,
         remaining: queue.suggestions.length,
       });
@@ -1120,7 +1120,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
     const isNoOp = oldContent === result.completion;
     if (isNoOp) {
       console.log(
-        "[Sweep] Inline edit response is a no-op after trimming newlines; skipping render",
+        "[zetacode] Inline edit response is a no-op after trimming newlines; skipping render",
         { id: result.id },
       );
     }
@@ -1189,7 +1189,7 @@ export class InlineEditProvider implements vscode.InlineCompletionItemProvider {
       endIndex: result.endIndex + adjustmentOffset,
     }));
 
-    console.log("[Sweep] Rendering extension from stale inline response", {
+    console.log("[zetacode] Rendering extension from stale inline response", {
       id: adjustedFirst.id,
       adjustmentOffset,
     });

@@ -29,7 +29,7 @@ function inMemoryTelemetry() {
     shutdown: () => Promise.resolve(),
   };
   const provider = new TracerProvider({
-    resource: resourceFromAttributes({ "service.namespace": "nesweep" }),
+    resource: resourceFromAttributes({ "service.namespace": "zetacode" }),
     spanProcessors: [new SimpleSpanProcessor({ exporter })],
   });
   return {
@@ -53,13 +53,13 @@ describe("ExtensionTelemetry", () => {
     await telemetry.shutdown();
 
     const [completion] = exporter.getFinishedSpans();
-    expect(completion?.name).toBe("nesweep.completion");
+    expect(completion?.name).toBe("zetacode.completion");
     expect(completion?.ended).toBe(true);
     expect(completion?.attributes).toMatchObject({
-      "nesweep.outcome": "disposed",
-      "nesweep.paint_observed": false,
+      "zetacode.outcome": "disposed",
+      "zetacode.paint_observed": false,
     });
-    expect(completion?.resource.attributes["service.namespace"]).toBe("nesweep");
+    expect(completion?.resource.attributes["service.namespace"]).toBe("zetacode");
 
     const exported = JSON.stringify({
       name: completion?.name,
@@ -85,7 +85,7 @@ describe("ExtensionTelemetry", () => {
 
     const completions = exporter.getFinishedSpans();
     expect(completions).toHaveLength(1);
-    expect(completions[0]?.attributes["nesweep.outcome"]).toBe("no_edit");
+    expect(completions[0]?.attributes["zetacode.outcome"]).toBe("no_edit");
     await telemetry.shutdown();
   });
 
@@ -113,9 +113,9 @@ describe("ExtensionTelemetry", () => {
     await telemetry.shutdown();
 
     expect(output).toHaveBeenCalled();
-    expect(JSON.stringify(output.mock.calls)).toContain('"service.namespace":"nesweep"');
+    expect(JSON.stringify(output.mock.calls)).toContain('"service.namespace":"zetacode"');
     expect(JSON.stringify(output.mock.calls)).toContain('"service.name":"vscode-extension"');
-    expect(JSON.stringify(output.mock.calls)).toContain("nesweep.completion");
+    expect(JSON.stringify(output.mock.calls)).toContain("zetacode.completion");
     expect(trace.getTracerProvider()).toBe(hostProvider);
   });
 });

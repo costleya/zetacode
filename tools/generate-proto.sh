@@ -12,4 +12,4 @@ pnpm --dir "$ROOT/server" exec python -m grpc_tools.protoc \
   --ts_proto_out="$ROOT/extension/src/api/generated" \
   --ts_proto_opt=outputServices=grpc-js,env=node,esModuleInterop=true,useOptionals=messages,oneof=unions-value,forceLong=number \
   "$ROOT/proto/completion.proto"
-pnpm --filter nesweep exec vp fmt src/api/generated/completion.ts
+pnpm --filter zetacode exec vp fmt src/api/generated/completion.ts

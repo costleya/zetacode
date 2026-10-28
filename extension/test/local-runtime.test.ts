@@ -5,7 +5,7 @@ import { getLocalRuntimeSocketPath } from "~/core/local-runtime.ts";
 describe("managed local socket identity", () => {
   test("uses the resolved storage root and Unix user in a stable socket path", () => {
     expect(getLocalRuntimeSocketPath("/profiles/work/local-models", 501)).toBe(
-      "/tmp/nesweep-501/f6bb5946c932e6f1.sock",
+      "/tmp/zetacode-501/f6bb5946c932e6f1.sock",
     );
     expect(getLocalRuntimeSocketPath("/profiles/work/../work/local-models", 501)).toBe(
       getLocalRuntimeSocketPath("/profiles/work/local-models", 501),
@@ -26,7 +26,7 @@ describe("managed local socket identity", () => {
     const storage = `/Users/user/${"設定とモデル/".repeat(100)}local-models`;
     const socket = getLocalRuntimeSocketPath(storage, 501);
     expect(Buffer.byteLength(socket, "utf8")).toBeLessThanOrEqual(103);
-    expect(socket).toMatch(/^\/tmp\/nesweep-501\/[a-f0-9]{16}\.sock$/);
+    expect(socket).toMatch(/^\/tmp\/zetacode-501\/[a-f0-9]{16}\.sock$/);
     expect(socket).not.toContain("設定");
   });
 

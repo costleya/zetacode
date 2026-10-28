@@ -21,7 +21,7 @@ import {
   type UntypedServiceImplementation,
 } from "@grpc/grpc-js";
 
-export const protobufPackage = "nesweep";
+export const protobufPackage = "zetacode";
 
 export const protobufFileName = "completion.proto";
 
@@ -800,7 +800,7 @@ export const HealthResponse: MessageFns<HealthResponse> = {
 export type CompletionServiceService = typeof CompletionServiceService;
 export const CompletionServiceService = {
   complete: {
-    path: "/nesweep.CompletionService/Complete" as const,
+    path: "/zetacode.CompletionService/Complete" as const,
     requestStream: false as const,
     responseStream: true as const,
     requestSerialize: (value: CompletionRequest): Buffer =>
@@ -811,7 +811,7 @@ export const CompletionServiceService = {
     responseDeserialize: (value: Buffer): CompletionEvent => CompletionEvent.decode(value),
   },
   health: {
-    path: "/nesweep.CompletionService/Health" as const,
+    path: "/zetacode.CompletionService/Health" as const,
     requestStream: false as const,
     responseStream: false as const,
     requestSerialize: (value: HealthRequest): Buffer =>
@@ -857,7 +857,7 @@ export interface CompletionServiceClient extends Client {
 
 export const CompletionServiceClient = makeGenericClientConstructor(
   CompletionServiceService,
-  "nesweep.CompletionService",
+  "zetacode.CompletionService",
 ) as unknown as {
   new (
     address: string,

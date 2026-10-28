@@ -5,7 +5,7 @@ import { createTelemetry, type ExtensionTelemetry } from "~/core/telemetry.ts";
 import { InlineEditProvider } from "~/editor/inline-edit-provider.ts";
 import { JumpEditManager } from "~/editor/jump-edit-manager.ts";
 import { registerInlineCompletionItemProviderWithMetadata } from "~/editor/proposed-inline-edit.ts";
-import { registerStatusBarCommands, SweepStatusBar } from "~/extension/status-bar.ts";
+import { registerStatusBarCommands, ZetacodeStatusBar } from "~/extension/status-bar.ts";
 import { ManagedLocalServer } from "~/services/managed-local-server.ts";
 import { CompletionServer } from "~/services/completion-server.ts";
 import {
@@ -31,7 +31,7 @@ export function activate(context: vscode.ExtensionContext): void {
   const metrics = new AutocompleteMetricsTracker();
   jump = new JumpEditManager();
   provider = new InlineEditProvider(tracker, jump, api, metrics, telemetry);
-  const status = new SweepStatusBar(context);
+  const status = new ZetacodeStatusBar(context);
   const move = (editor: vscode.TextEditor) => {
     void provider?.handleCursorMove(editor.document, editor.selection.active);
   };
@@ -47,8 +47,8 @@ export function activate(context: vscode.ExtensionContext): void {
   let registration: vscode.Disposable;
   try {
     registration = registerInlineCompletionItemProviderWithMetadata({ pattern: "**/*" }, provider, {
-      groupId: "nesweep",
-      displayName: "NESweep",
+      groupId: "zetacode",
+      displayName: "zetacode",
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -67,11 +67,11 @@ export function activate(context: vscode.ExtensionContext): void {
   }
   context.subscriptions.push(
     registration,
-    vscode.commands.registerCommand("sweep.triggerNextEdit", () =>
+    vscode.commands.registerCommand("zetacode.triggerNextEdit", () =>
       vscode.commands.executeCommand("editor.action.inlineSuggest.trigger"),
     ),
     vscode.commands.registerCommand(
-      "sweep.acceptInlineEdit",
+      "zetacode.acceptInlineEdit",
       (
         payload: AutocompleteMetricsPayload | undefined,
         suggestion:

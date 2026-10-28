@@ -14,5 +14,5 @@ if ! command -v pnpm >/dev/null 2>&1; then
   echo 'Install Node.js 24 and pnpm 12.8.1 or newer, or set ZETA_PYTHON to a prepared Python executable.' >&2
   exit 1
 fi
-pnpm --dir "$ROOT" install --frozen-lockfile --filter nesweep-zeta-server
+pnpm --dir "$ROOT" install --frozen-lockfile --filter zetacode-zeta-server
 exec pnpm --dir "$ROOT" exec python "$ROOT/src/server.py" --model "$MODEL" --qwen-model "$QWEN_MODEL_PATH" "$@"

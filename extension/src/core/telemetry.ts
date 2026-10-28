@@ -30,7 +30,7 @@ export class ExtensionTelemetry {
   private closing: Promise<void> | undefined;
 
   constructor(private readonly provider?: OwnedProvider) {
-    this.tracer = provider?.getTracer("nesweep");
+    this.tracer = provider?.getTracer("zetacode");
   }
 
   recordDocumentChange(document: object & { version: number }): void {
@@ -43,10 +43,10 @@ export class ExtensionTelemetry {
     const bookmark = this.changes.get(document);
     this.changes.delete(document);
     const span = this.tracer.startSpan(
-      "nesweep.completion",
+      "zetacode.completion",
       {
         ...(bookmark?.version === document.version ? { startTime: bookmark.time } : {}),
-        attributes: { "nesweep.paint_observed": false },
+        attributes: { "zetacode.paint_observed": false },
       },
       ROOT_CONTEXT,
     );
@@ -56,7 +56,7 @@ export class ExtensionTelemetry {
 
   endCompletion(span: Span | undefined, outcome: string): void {
     if (!span || !this.roots.delete(span)) return;
-    span.setAttribute("nesweep.outcome", outcome);
+    span.setAttribute("zetacode.outcome", outcome);
     if (outcome === "error" || outcome === "decoration_error")
       span.setStatus({ code: SpanStatusCode.ERROR });
     span.end();
@@ -97,7 +97,7 @@ export function createTelemetry(env: NodeJS.ProcessEnv = process.env): Extension
     return new ExtensionTelemetry(
       new SDKTracerProvider({
         resource: resourceFromAttributes({
-          "service.namespace": "nesweep",
+          "service.namespace": "zetacode",
           "service.name": "vscode-extension",
         }),
         spanProcessors: [new BatchSpanProcessor({ exporter, exportTimeoutMillis: 1000 })],

@@ -20,7 +20,7 @@ vi.mock("vscode", () => {
     show: () => {},
     hide: () => {},
     dispose: () => {},
-    name: "NESweep",
+    name: "zetacode",
     logLevel: 0,
     onDidChangeLogLevel: () => ({ dispose: () => {} }),
     replace: () => {},

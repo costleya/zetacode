@@ -1,6 +1,6 @@
 {
-  "name": "nesweep",
-  "displayName": "NESweep autocompletion",
+  "name": "zetacode",
+  "displayName": "zetacode autocompletion",
   "version": "1.2.7",
   "private": true,
   "description": "Next Edit Autocomplete using Zeta-2.1.",
@@ -20,7 +20,7 @@
     "type": "git",
     "url": "https://github.com/costleya/vscode-nes"
   },
-  "publisher": "s-obvious",
+  "publisher": "costleya",
   "main": "./out/extension.mjs",
   "scripts": {
     "build": "vp pack",
@@ -52,58 +52,58 @@
   },
   "contributes": {
     "icons": {
-      "nesweep-idle": {
-        "description": "NESweep idle",
+      "zetacode-idle": {
+        "description": "zetacode idle",
         "default": {
-          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontPath": "./assets/zetacode-icons.ttf",
           "fontCharacter": "\\ea01"
         }
       },
-      "nesweep-load-1": {
-        "description": "NESweep loading 1",
+      "zetacode-load-1": {
+        "description": "zetacode loading 1",
         "default": {
-          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontPath": "./assets/zetacode-icons.ttf",
           "fontCharacter": "\\ea02"
         }
       },
-      "nesweep-load-2": {
-        "description": "NESweep loading 2",
+      "zetacode-load-2": {
+        "description": "zetacode loading 2",
         "default": {
-          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontPath": "./assets/zetacode-icons.ttf",
           "fontCharacter": "\\ea03"
         }
       },
-      "nesweep-load-3": {
-        "description": "NESweep loading 3",
+      "zetacode-load-3": {
+        "description": "zetacode loading 3",
         "default": {
-          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontPath": "./assets/zetacode-icons.ttf",
           "fontCharacter": "\\ea04"
         }
       },
-      "nesweep-load-4": {
-        "description": "NESweep loading 4",
+      "zetacode-load-4": {
+        "description": "zetacode loading 4",
         "default": {
-          "fontPath": "./assets/nesweep-icons.ttf",
+          "fontPath": "./assets/zetacode-icons.ttf",
           "fontCharacter": "\\ea05"
         }
       }
     },
     "commands": [
       {
-        "command": "sweep.triggerNextEdit",
-        "title": "NESweep: Request Suggestion"
+        "command": "zetacode.triggerNextEdit",
+        "title": "zetacode: Request Suggestion"
       },
       {
-        "command": "sweep.toggleEnabled",
-        "title": "NESweep: Toggle Suggestions"
+        "command": "zetacode.toggleEnabled",
+        "title": "zetacode: Toggle Suggestions"
       },
       {
-        "command": "sweep.showMenu",
-        "title": "NESweep: Open Menu"
+        "command": "zetacode.showMenu",
+        "title": "zetacode: Open Menu"
       },
       {
-        "command": "sweep.acceptInlineEdit",
-        "title": "NESweep: Accept Inline Edit"
+        "command": "zetacode.acceptInlineEdit",
+        "title": "zetacode: Accept Inline Edit"
       }
     ],
     "keybindings": [
@@ -125,70 +125,70 @@
     ],
     "configuration": [
       {
-        "title": "NESweep: General",
+        "title": "zetacode: General",
         "order": 10,
         "properties": {
-          "sweep.enabled": {
+          "zetacode.enabled": {
             "type": "boolean",
             "default": true,
             "order": 10,
             "scope": "window",
             "markdownDescription": "Enable next-edit suggestions."
           },
-          "sweep.maxContextFiles": {
+          "zetacode.maxContextFiles": {
             "type": "number",
             "default": 5,
             "order": 100,
             "minimum": 0,
             "markdownDescription": "Maximum related files used for context."
           },
-          "sweep.outlineSymbols": {
+          "zetacode.outlineSymbols": {
             "type": "number",
             "default": 0,
             "order": 140,
             "minimum": 0,
             "markdownDescription": "Maximum nearby document symbols included; zero disables outlines."
           },
-          "sweep.maxEditHistory": {
+          "zetacode.maxEditHistory": {
             "type": "number",
             "default": 15,
             "order": 110,
             "minimum": 1,
             "markdownDescription": "Maximum recent edit records included."
           },
-          "sweep.maxRecentChangesChars": {
+          "zetacode.maxRecentChangesChars": {
             "type": "number",
             "default": 12000,
             "order": 120,
             "minimum": 0,
             "markdownDescription": "Character limit for recent edits; zero omits them."
           },
-          "sweep.includeClipboardContext": {
+          "zetacode.includeClipboardContext": {
             "type": "boolean",
             "default": true,
             "order": 130,
             "markdownDescription": "Include clipboard text in retrieval context."
           },
-          "sweep.stableRetrievalOrdering": {
+          "zetacode.stableRetrievalOrdering": {
             "type": "boolean",
             "default": false,
             "order": 170,
             "markdownDescription": "Sort equivalent retrieval results consistently."
           },
-          "sweep.reuseIdenticalPromptResults": {
+          "zetacode.reuseIdenticalPromptResults": {
             "type": "boolean",
             "default": false,
             "order": 180,
             "markdownDescription": "Reuse recent results for identical prompts."
           },
-          "sweep.identicalPromptCacheTtlMs": {
+          "zetacode.identicalPromptCacheTtlMs": {
             "type": "number",
             "default": 5000,
             "order": 190,
             "minimum": 0,
             "markdownDescription": "Lifetime of cached identical-prompt results in milliseconds."
           },
-          "sweep.autocompleteExclusionPatterns": {
+          "zetacode.autocompleteExclusionPatterns": {
             "type": "array",
             "order": 50,
             "items": {
@@ -205,50 +205,50 @@
             ],
             "markdownDescription": "File patterns excluded from suggestion requests."
           },
-          "sweep.autocompleteSnoozeUntil": {
+          "zetacode.autocompleteSnoozeUntil": {
             "type": "number",
             "default": 0,
             "order": 60,
             "markdownDescription": "Pause suggestions until this Unix timestamp in milliseconds."
           },
-          "sweep.completionTimeoutMs": {
+          "zetacode.completionTimeoutMs": {
             "type": "number",
             "default": 10000,
             "order": 40,
             "markdownDescription": "Request deadline in milliseconds."
           },
-          "sweep.retriggerOnContextExit": {
+          "zetacode.retriggerOnContextExit": {
             "type": "boolean",
             "default": false,
             "order": 45,
             "markdownDescription": "Request another suggestion when the cursor leaves the previous editable window."
           },
-          "sweep.contextExitRetriggerDebounceMs": {
+          "zetacode.contextExitRetriggerDebounceMs": {
             "type": "number",
             "default": 1500,
             "minimum": 0,
             "order": 46,
             "markdownDescription": "Delay after cursor movement before requesting again."
           },
-          "sweep.diagRadius": {
+          "zetacode.diagRadius": {
             "type": "number",
             "default": 12,
             "order": 160,
             "markdownDescription": "Maximum line distance for diagnostics; zero disables filtering."
           },
-          "sweep.injectInlineDiagnostics": {
+          "zetacode.injectInlineDiagnostics": {
             "type": "boolean",
             "default": false,
             "order": 230,
             "markdownDescription": "Place diagnostics next to source lines instead of in a separate section."
           },
-          "sweep.inlineDiagnosticsMarker": {
+          "zetacode.inlineDiagnosticsMarker": {
             "type": "string",
             "default": "BUG: LSP error here",
             "order": 240,
             "markdownDescription": "Marker used to identify injected diagnostic comments."
           },
-          "sweep.diagnosticsMessageTransforms": {
+          "zetacode.diagnosticsMessageTransforms": {
             "type": "object",
             "order": 250,
             "default": {},
@@ -261,17 +261,17 @@
         }
       },
       {
-        "title": "NESweep: Active File Context",
+        "title": "zetacode: Active File Context",
         "order": 20,
         "properties": {
-          "sweep.editableTokens": {
+          "zetacode.editableTokens": {
             "type": "number",
             "default": 350,
             "order": 10,
             "minimum": 1,
             "markdownDescription": "Approximate token budget for the editable current-file excerpt."
           },
-          "sweep.zetaContextTokens": {
+          "zetacode.zetaContextTokens": {
             "type": "number",
             "default": 150,
             "order": 20,
@@ -285,7 +285,7 @@
   "activationEvents": [
     "onStartupFinished"
   ],
-  "icon": "assets/nesweep.png",
+  "icon": "assets/zetacode.png",
   "engines": {
     "vscode": "^1.142.0"
   },

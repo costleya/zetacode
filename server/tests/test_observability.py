@@ -91,7 +91,7 @@ class ObservabilityTests(unittest.TestCase):
         self.assertEqual({span.name for span in spans}, {
             "decoder.prefill", "decoder.decode", "completion.generate"})
         self.assertEqual({cast(str, cast(Mapping[str, AttributeValue], span.attributes)[
-            "nesweep.outcome"]) for span in spans}, {
+            "zetacode.outcome"]) for span in spans}, {
             "success", "error", "cancelled"})
         error = next(span for span in spans if span.name == "decoder.decode")
         self.assertEqual(error.status.status_code, StatusCode.ERROR)
@@ -121,11 +121,11 @@ class ObservabilityTests(unittest.TestCase):
 
         recorded, = self.exporter.get_finished_spans()
         self.assertEqual(recorded.attributes, {
-            "nesweep.usage.prompt_tokens": 8,
-            "nesweep.usage.completion_tokens": 3,
-            "nesweep.memory.active_bytes": 100,
-            "nesweep.cache.cached_prompt_tokens": 2,
-            "nesweep.draft_stats.accepted_tokens": 1,
+            "zetacode.usage.prompt_tokens": 8,
+            "zetacode.usage.completion_tokens": 3,
+            "zetacode.memory.active_bytes": 100,
+            "zetacode.cache.cached_prompt_tokens": 2,
+            "zetacode.draft_stats.accepted_tokens": 1,
         })
         serialized = repr((recorded.attributes, recorded.events))
         for secret in ("private completion", "private prompt", "/private/model"):
@@ -153,7 +153,7 @@ class ObservabilityTests(unittest.TestCase):
                 assert provider is not None
                 resource = provider.resource
                 self.assertEqual(resource.attributes.get("service.namespace"),
-                                 "nesweep")
+                                 "zetacode")
                 self.assertEqual(resource.attributes.get("service.name"),
                                  "model-server")
             finally:

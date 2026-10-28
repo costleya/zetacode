@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
-  <title>NESweep loading frame 4</title>
+  <title>zetacode loading frame 1</title>
   <g transform="scale(0.8165869219)" fill="none" stroke="black" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M235 327H665" stroke-width="88"/>
+    <path d="M235 327H665" stroke-width="160"/>
     <path d="M665 327L250 847" stroke-width="88"/>
     <path d="M250 847H660" stroke-width="88"/>
-    <path d="M800 282L1060 628L756 965" stroke-width="160"/>
+    <path d="M800 282L1060 628L756 965" stroke-width="88"/>
   </g>
 </svg>

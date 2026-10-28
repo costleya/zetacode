@@ -21,9 +21,9 @@ const exclusions = [
   "**/.dev.vars",
   "**/secrets.yml",
 ];
-export class SweepConfig {
+export class ZetacodeConfig {
   private get values() {
-    return vscode.workspace.getConfiguration("sweep");
+    return vscode.workspace.getConfiguration("zetacode");
   }
   private number(key: string, fallback: number, min: number) {
     const value = this.values.get<number>(key, fallback);
@@ -142,4 +142,4 @@ export class SweepConfig {
     return this.values.update("autocompleteSnoozeUntil", value, target);
   }
 }
-export const config = new SweepConfig();
+export const config = new ZetacodeConfig();

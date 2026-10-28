@@ -102,7 +102,7 @@ function glyph(contours: Contour[]) {
   return pad(join(u16(contours.length), bounds.map(u16), ends, u16(0), flags, dx, dy));
 }
 
-const sources = ["nesweep-glyph.svg", ...[1, 2, 3, 4].map((n) => `nesweep-load-${n}.svg`)];
+const sources = ["zetacode-glyph.svg", ...[1, 2, 3, 4].map((n) => `zetacode-load-${n}.svg`)];
 const shapes = [[], ...sources.map(outlines)];
 const glyphs = shapes.map(glyph);
 const bounds = shapes.flat(2);
@@ -204,12 +204,12 @@ const cmap4 = join(
 );
 tables.set("cmap", join(u16(0), u16(1), u16(3), u16(1), u32(12), cmap4));
 const names: [number, string][] = [
-  [1, "NESweep Icons"],
+  [1, "zetacode Icons"],
   [2, "Regular"],
-  [3, "NESweep Icons 1.0"],
-  [4, "NESweep Icons"],
+  [3, "zetacode Icons 1.0"],
+  [4, "zetacode Icons"],
   [5, "Version 1.0"],
-  [6, "NESweepIcons"],
+  [6, "zetacodeIcons"],
 ];
 let nameOffset = 0;
 const strings = names.map(([, text]) =>
@@ -274,7 +274,7 @@ const sfnt = buildSfnt();
 tables.get("head")!.writeUInt32BE((0xb1b0afba - checksum(sfnt)) >>> 0, 8);
 const font = buildSfnt();
 if (checksum(font) !== 0xb1b0afba) throw new Error("Invalid TrueType font checksum");
-writeFileSync(resolve(root, "extension/assets/nesweep-icons.ttf"), font);
+writeFileSync(resolve(root, "extension/assets/zetacode-icons.ttf"), font);
 console.log(
   `Built ${n} tables; EA01–EA05; bounds ${fontBounds.join(", ")}; ${shapes
     .slice(1)

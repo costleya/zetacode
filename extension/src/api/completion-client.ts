@@ -56,13 +56,13 @@ export class CompletionClient {
     if (signal?.aborted) throw abortError();
     const parentContext = req.traceContext ?? ROOT_CONTEXT;
     const span = req.tracer?.startSpan(
-      "nesweep.grpc.complete",
+      "zetacode.grpc.complete",
       {
         kind: SpanKind.CLIENT,
         attributes: {
           "rpc.system": "grpc",
-          "rpc.method": "nesweep.CompletionService/Complete",
-          "nesweep.model": LOCAL_MODEL_NAMES.includes(req.model) ? req.model : "unknown",
+          "rpc.method": "zetacode.CompletionService/Complete",
+          "zetacode.model": LOCAL_MODEL_NAMES.includes(req.model) ? req.model : "unknown",
         },
       },
       parentContext,
@@ -71,7 +71,7 @@ export class CompletionClient {
     const endSpan = (outcome: "completed" | "error" | "cancelled") => {
       if (!span || spanEnded) return;
       spanEnded = true;
-      span.setAttribute("nesweep.outcome", outcome);
+      span.setAttribute("zetacode.outcome", outcome);
       if (outcome === "error") span.setStatus({ code: SpanStatusCode.ERROR });
       else if (outcome === "completed") span.setStatus({ code: SpanStatusCode.OK });
       else span.setStatus({ code: SpanStatusCode.UNSET });
@@ -139,13 +139,13 @@ export class CompletionClient {
             if (final.promptEvalCount !== undefined) {
               result.promptEvalCount = final.promptEvalCount;
               if (Number.isFinite(final.promptEvalCount)) {
-                span?.setAttribute("nesweep.prompt_eval_count", final.promptEvalCount);
+                span?.setAttribute("zetacode.prompt_eval_count", final.promptEvalCount);
               }
             }
             if (final.evalCount !== undefined) {
               result.evalCount = final.evalCount;
               if (Number.isFinite(final.evalCount))
-                span?.setAttribute("nesweep.eval_count", final.evalCount);
+                span?.setAttribute("zetacode.eval_count", final.evalCount);
             }
           } else if (event?.$case === "firstToken" && !firstTokenNotified) {
             firstTokenNotified = true;

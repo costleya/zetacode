@@ -311,7 +311,7 @@ export class ApiClient {
   ): Promise<AutocompleteResult[] | null> {
     this.setProcessing(1);
     const span = input.tracer?.startSpan(
-      "nesweep.api.autocomplete",
+      "zetacode.api.autocomplete",
       {},
       input.traceContext ?? ROOT_CONTEXT,
     );
@@ -326,18 +326,18 @@ export class ApiClient {
       );
       outcome = signal?.aborted ? "cancelled" : "completed";
       span?.setAttribute(
-        "nesweep.outcome",
+        "zetacode.outcome",
         signal?.aborted ? "cancelled" : results?.length ? "edits" : "no_edit",
       );
       return results;
     } catch {
       outcome = signal?.aborted ? "cancelled" : "error";
-      span?.setAttribute("nesweep.outcome", outcome);
+      span?.setAttribute("zetacode.outcome", outcome);
       span?.addEvent("api.failed", { outcome: signal?.aborted ? "aborted" : "error" });
       return null;
     } finally {
       if (span) {
-        if (outcome !== "completed") span.setAttribute("nesweep.outcome", outcome);
+        if (outcome !== "completed") span.setAttribute("zetacode.outcome", outcome);
         if (outcome === "error") span.setStatus({ code: SpanStatusCode.ERROR });
         else if (outcome === "completed") span.setStatus({ code: SpanStatusCode.OK });
         span.end();

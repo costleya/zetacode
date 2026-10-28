@@ -2,17 +2,17 @@ import * as vscode from "vscode";
 import { config } from "~/core/config.ts";
 import type { CompletionServer } from "~/services/completion-server.ts";
 
-export class SweepStatusBar implements vscode.Disposable {
+export class ZetacodeStatusBar implements vscode.Disposable {
   private item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   private listener: vscode.Disposable;
   private timer: ReturnType<typeof setInterval> | undefined;
   private frame = 0;
   constructor(_context: vscode.ExtensionContext) {
-    this.item.command = "sweep.showMenu";
+    this.item.command = "zetacode.showMenu";
     this.listener = vscode.workspace.onDidChangeConfiguration((e) => {
       if (
-        e.affectsConfiguration("sweep.enabled") ||
-        e.affectsConfiguration("sweep.autocompleteSnoozeUntil")
+        e.affectsConfiguration("zetacode.enabled") ||
+        e.affectsConfiguration("zetacode.autocompleteSnoozeUntil")
       )
         this.render();
     });
@@ -34,8 +34,8 @@ export class SweepStatusBar implements vscode.Disposable {
   }
   private render(): void {
     const snoozed = config.isAutocompleteSnoozed();
-    this.item.text = `$(${this.timer ? `nesweep-load-${this.frame || 1}` : "nesweep-idle"}) NESweep`;
-    this.item.tooltip = `NESweep: ${config.enabled ? "enabled" : "disabled"}\n${snoozed ? `Paused until ${new Date(config.autocompleteSnoozeUntil).toLocaleString()}` : "Not paused"}`;
+    this.item.text = `$(${this.timer ? `zetacode-load-${this.frame || 1}` : "zetacode-idle"}) zetacode`;
+    this.item.tooltip = `zetacode: ${config.enabled ? "enabled" : "disabled"}\n${snoozed ? `Paused until ${new Date(config.autocompleteSnoozeUntil).toLocaleString()}` : "Not paused"}`;
     this.item.backgroundColor =
       !config.enabled || snoozed
         ? new vscode.ThemeColor("statusBarItem.warningBackground")
@@ -52,12 +52,12 @@ export function registerStatusBarCommands(
   server: CompletionServer,
 ): vscode.Disposable[] {
   return [
-    vscode.commands.registerCommand("sweep.toggleEnabled", async () => {
+    vscode.commands.registerCommand("zetacode.toggleEnabled", async () => {
       const wasEnabled = config.enabled;
       await config.setEnabled(!wasEnabled);
       if (wasEnabled) await vscode.commands.executeCommand("editor.action.inlineSuggest.hide");
     }),
-    vscode.commands.registerCommand("sweep.showMenu", async () => {
+    vscode.commands.registerCommand("zetacode.showMenu", async () => {
       const items: Array<vscode.QuickPickItem & { action: string }> = [
         { label: config.enabled ? "Disable suggestions" : "Enable suggestions", action: "toggle" },
         {
@@ -66,10 +66,10 @@ export function registerStatusBarCommands(
         },
         { label: "Check local models", action: "check" },
       ];
-      const selected = await vscode.window.showQuickPick(items, { title: "NESweep" });
+      const selected = await vscode.window.showQuickPick(items, { title: "zetacode" });
       switch (selected?.action) {
         case "toggle":
-          await vscode.commands.executeCommand("sweep.toggleEnabled");
+          await vscode.commands.executeCommand("zetacode.toggleEnabled");
           break;
         case "resume":
           await config.setAutocompleteSnoozeUntil(0);
@@ -92,7 +92,7 @@ export function registerStatusBarCommands(
         }
         case "check":
           if (await server.ensureReachable())
-            void vscode.window.showInformationMessage("NESweep local models are ready.");
+            void vscode.window.showInformationMessage("zetacode local models are ready.");
           break;
       }
     }),

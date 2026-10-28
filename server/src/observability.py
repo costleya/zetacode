@@ -45,7 +45,7 @@ def configure_tracing(provider: object | None = None) -> None:
         # narrower SDK parameter and optional arguments do not structurally match.
         candidate = (cast(_Provider, provider) if provider is not None else
                      cast(_Provider, TracerProvider(resource=Resource.create({
-                         'service.namespace': 'nesweep', 'service.name': 'model-server'}))))
+                         'service.namespace': 'zetacode', 'service.name': 'model-server'}))))
         if provider is None:
             exporter = os.environ.get('OTEL_TRACES_EXPORTER', 'none').strip().lower()
             if exporter == 'console':
@@ -62,7 +62,7 @@ def configure_tracing(provider: object | None = None) -> None:
             elif exporter != 'none':
                 raise ValueError('unsupported exporter')
         _provider = candidate
-        _tracer = candidate.get_tracer('nesweep.model-server')
+        _tracer = candidate.get_tracer('zetacode.model-server')
     except Exception:
         if candidate is not None:
             try:
@@ -106,7 +106,7 @@ def start_span(name: str, *, context: Context | None = None,
 
 def mark_error(span: trace.Span, error: BaseException) -> None:
     span.set_attribute('error.type', type(error).__name__)
-    span.set_attribute('nesweep.outcome', 'error')
+    span.set_attribute('zetacode.outcome', 'error')
     span.set_status(Status(StatusCode.ERROR))
 
 
@@ -119,12 +119,12 @@ def span_scope(name: str, **kwargs: Unpack[_StartSpanOptions]) -> Generator[trac
             yield span
         except BaseException as error:
             if type(error).__name__ in ('GenerationCancelled', 'GeneratorExit'):
-                span.set_attribute('nesweep.outcome', 'cancelled')
+                span.set_attribute('zetacode.outcome', 'cancelled')
             else:
                 mark_error(span, error)
             raise
         else:
-            span.set_attribute('nesweep.outcome', 'success')
+            span.set_attribute('zetacode.outcome', 'success')
         finally:
             span.end()
 
@@ -145,4 +145,4 @@ def record_result(span: trace.Span, result: Mapping[str, object]) -> None:
                                                   if isinstance(group_value, Mapping) else {})
             value: object = group_fields.get(key)
             if isinstance(value, (int, float)) and not isinstance(value, bool):
-                span.set_attribute(f'nesweep.{group}.{key}', value)
+                span.set_attribute(f'zetacode.{group}.{key}', value)

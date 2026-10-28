@@ -1,5 +1,5 @@
 syntax = "proto3";
-package nesweep;
+package zetacode;
 
 service CompletionService {
   rpc Complete(CompletionRequest) returns (stream CompletionEvent);

@@ -198,7 +198,7 @@ class ServerTests(unittest.TestCase):
 
             self.assertCountEqual(worker_contexts, [0x1111, 0x2222])
             spans = exporter.get_finished_spans()
-            roots = [span for span in spans if span.name == "nesweep.CompletionService/Complete"]
+            roots = [span for span in spans if span.name == "zetacode.CompletionService/Complete"]
             generations = [span for span in spans if span.name == "completion.generate"]
             self.assertEqual(len(roots), 2)
             self.assertEqual(len(generations), 2)
@@ -227,7 +227,7 @@ class ServerTests(unittest.TestCase):
                         cast(SpanContext, generation.context).span_id,
                     )
                 self.assertEqual(
-                    cast(Mapping[str, AnyValue], root.attributes)["nesweep.outcome"],
+                    cast(Mapping[str, AnyValue], root.attributes)["zetacode.outcome"],
                     "success",
                 )
 
@@ -268,7 +268,7 @@ class ServerTests(unittest.TestCase):
                     model="zeta-2.1", prompt="private prompt", temperature=0)
                 list(service.Complete(request, _ActiveContext(metadata=request_metadata)))
             roots = [span for span in exporter.get_finished_spans()
-                     if span.name == "nesweep.CompletionService/Complete"]
+                     if span.name == "zetacode.CompletionService/Complete"]
             self.assertEqual(len(roots), 3)
             valid = next(
                 span for span in roots

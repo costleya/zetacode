@@ -332,7 +332,7 @@ export class DocumentTracker implements vscode.Disposable {
   }
 
   getEditDiffHistory(): EditRecord[] {
-    const config = vscode.workspace.getConfiguration("sweep");
+    const config = vscode.workspace.getConfiguration("zetacode");
     const limit = Math.max(1, config.get<number>("maxEditHistory", 15));
     const otherLimit = Math.max(0, config.get<number>("maxContextFiles", 5));
     const active = this.activePath
@@ -586,7 +586,7 @@ export class DocumentTracker implements vscode.Disposable {
     };
     this.writing = this.writing.then(async () => {
       try {
-        await this.context!.workspaceState.update("sweep.tracker.v2", payload);
+        await this.context!.workspaceState.update("zetacode.tracker.v2", payload);
       } catch {
         this.dirty = true;
       }
@@ -598,14 +598,14 @@ export class DocumentTracker implements vscode.Disposable {
     const state = this.context.workspaceState;
     let data: any;
     try {
-      data = state.get("sweep.tracker.v2");
+      data = state.get("zetacode.tracker.v2");
     } catch {
       return;
     }
     let legacy = false;
     if (!data || data.version !== 2) {
       try {
-        data = state.get("sweep.tracker.v1");
+        data = state.get("zetacode.tracker.v1");
       } catch {
         return;
       }
@@ -766,7 +766,7 @@ export class DocumentTracker implements vscode.Disposable {
     if (legacy) {
       this.markDirty();
       try {
-        await state.update("sweep.tracker.v1", undefined);
+        await state.update("zetacode.tracker.v1", undefined);
       } catch {
         /* best effort */
       }

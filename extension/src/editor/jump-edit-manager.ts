@@ -43,7 +43,7 @@ export class JumpEditManager {
       isOnSingleNewlineBoundary,
     });
 
-    console.log("[Sweep] Edit display classification:", {
+    console.log("[zetacode] Edit display classification:", {
       cursorLine,
       editStartLine,
       editEndLine,

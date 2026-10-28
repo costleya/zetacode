@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 let channel: vscode.LogOutputChannel | undefined;
 export function initLogger(): vscode.LogOutputChannel {
-  return (channel ??= vscode.window.createOutputChannel("NESweep", { log: true }));
+  return (channel ??= vscode.window.createOutputChannel("zetacode", { log: true }));
 }
 export function disposeLogger(): void {
   channel?.dispose();

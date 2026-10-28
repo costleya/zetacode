@@ -135,7 +135,7 @@ function nextSetupReport(): Promise<void> {
 
 async function installedProgramArguments(): Promise<string[]> {
   const plist = await fs.readFile(
-    path.join(temporary, "Library", "LaunchAgents", "com.nesweep.local-models.plist"),
+    path.join(temporary, "Library", "LaunchAgents", "costleya.zetacode.local-models.plist"),
     "utf8",
   );
   const array = plist.match(/<key>ProgramArguments<\/key><array>(.*?)<\/array>/s)![1]!;
@@ -162,7 +162,7 @@ async function publishSetupStatus(changes: Record<string, unknown>): Promise<voi
 }
 
 beforeEach(async () => {
-  temporary = await fs.mkdtemp(path.join(os.tmpdir(), "nesweep-runtime-test-"));
+  temporary = await fs.mkdtemp(path.join(os.tmpdir(), "zetacode-runtime-test-"));
   extension = path.join(temporary, "extension & <new>");
   storage = path.join(temporary, "storage & <models>");
   const bundled = path.join(extension, "server");
@@ -282,7 +282,7 @@ describe("managed runtime provisioning", () => {
 
     await expect(managed.ensureReady()).rejects.toThrow(/Apple Silicon macOS/);
     expect(window.showErrorMessage).toHaveBeenCalledExactlyOnceWith(
-      expect.stringMatching(/Apple Silicon macOS.*NESweep Output/),
+      expect.stringMatching(/Apple Silicon macOS.*zetacode Output/),
       "Show Output",
     );
     expect(output.error).toHaveBeenCalledExactlyOnceWith(
@@ -424,7 +424,7 @@ describe("managed runtime provisioning", () => {
     expect(processes.execute).toHaveBeenCalledWith("/bin/launchctl", [
       "bootstrap",
       `gui/${process.getuid!()}`,
-      expect.stringContaining("com.nesweep.local-models.plist"),
+      expect.stringContaining("costleya.zetacode.local-models.plist"),
     ]);
   });
 
@@ -438,7 +438,7 @@ describe("managed runtime provisioning", () => {
     expect(processes.execute).toHaveBeenCalledWith("/bin/launchctl", [
       "bootstrap",
       `gui/${process.getuid!()}`,
-      expect.stringContaining("com.nesweep.local-models.plist"),
+      expect.stringContaining("costleya.zetacode.local-models.plist"),
     ]);
     await expect(fs.stat(path.join(storage, "local-models", "sources"))).resolves.toBeDefined();
   });
@@ -462,7 +462,7 @@ describe("managed runtime provisioning", () => {
       vi.stubEnv("MLX_METAL_RESIDENCY_REFRESH_INTERVAL_MS", interval);
       await manager().ensureReady();
       const plist = await fs.readFile(
-        path.join(temporary, "Library", "LaunchAgents", "com.nesweep.local-models.plist"),
+        path.join(temporary, "Library", "LaunchAgents", "costleya.zetacode.local-models.plist"),
         "utf8",
       );
       const key = "<key>MLX_METAL_RESIDENCY_REFRESH_INTERVAL_MS</key>";
@@ -558,7 +558,7 @@ describe("managed runtime provisioning", () => {
       }),
     );
     const plist = await fs.readFile(
-      path.join(temporary, "Library", "LaunchAgents", "com.nesweep.local-models.plist"),
+      path.join(temporary, "Library", "LaunchAgents", "costleya.zetacode.local-models.plist"),
       "utf8",
     );
     expect(plist).toContain("storage &amp; &lt;models&gt;");
@@ -583,7 +583,7 @@ describe("managed runtime provisioning", () => {
     expect(processes.execute).toHaveBeenCalledWith("/bin/launchctl", [
       "bootstrap",
       `gui/${process.getuid!()}`,
-      expect.stringContaining("com.nesweep.local-models.plist"),
+      expect.stringContaining("costleya.zetacode.local-models.plist"),
     ]);
     await expect(fs.stat(path.join(root, "setup.lock.released"))).resolves.toBeDefined();
   });
@@ -636,7 +636,7 @@ describe("managed runtime provisioning", () => {
     const stage = async () => {
       healthy = false;
       await fs.rm(
-        path.join(temporary, "Library", "LaunchAgents", "com.nesweep.local-models.plist"),
+        path.join(temporary, "Library", "LaunchAgents", "costleya.zetacode.local-models.plist"),
         { force: true },
       );
       await manager().ensureReady();
@@ -780,8 +780,8 @@ describe("managed runtime provisioning", () => {
       if (args[0] === "-convert")
         return {
           stdout: JSON.stringify({
-            Label: "com.nesweep.local-models",
-            NESweepStorageRoot: path.join(storage, "local-models"),
+            Label: "costleya.zetacode.local-models",
+            zetacodeStorageRoot: path.join(storage, "local-models"),
             ProgramArguments: await installedProgramArguments(),
           }),
           stderr: "",
@@ -803,10 +803,12 @@ describe("managed runtime provisioning", () => {
     ).resolves.toBeDefined();
     expect(processes.execute).toHaveBeenCalledWith("/bin/launchctl", [
       "bootout",
-      `gui/${process.getuid!()}/com.nesweep.local-models`,
+      `gui/${process.getuid!()}/costleya.zetacode.local-models`,
     ]);
     await expect(
-      fs.stat(path.join(temporary, "Library", "LaunchAgents", "com.nesweep.local-models.plist")),
+      fs.stat(
+        path.join(temporary, "Library", "LaunchAgents", "costleya.zetacode.local-models.plist"),
+      ),
     ).rejects.toMatchObject({ code: "ENOENT" });
   });
 
@@ -1021,7 +1023,7 @@ describe("managed runtime provisioning", () => {
     await fs.writeFile(path.join(root, "huggingface", "checkpoint"), "cached model");
     await fs.writeFile(path.join(extension, "server", "src", "server.py"), "updated server\n");
     await fs.unlink(
-      path.join(temporary, "Library", "LaunchAgents", "com.nesweep.local-models.plist"),
+      path.join(temporary, "Library", "LaunchAgents", "costleya.zetacode.local-models.plist"),
     );
     healthy = false;
 
@@ -1091,7 +1093,7 @@ describe("managed runtime provisioning", () => {
         temporary,
         "Library",
         "LaunchAgents",
-        "com.nesweep.local-models.plist",
+        "costleya.zetacode.local-models.plist",
       );
       await fs.mkdir(path.dirname(plist), { recursive: true });
       await fs.writeFile(plist, "current registration");
@@ -1110,8 +1112,8 @@ describe("managed runtime provisioning", () => {
         if (args[0] === "-convert")
           return {
             stdout: JSON.stringify({
-              Label: "com.nesweep.local-models",
-              NESweepStorageRoot: root,
+              Label: "costleya.zetacode.local-models",
+              zetacodeStorageRoot: root,
               ProgramArguments: previous,
             }),
             stderr: "",
@@ -1179,7 +1181,12 @@ describe("managed runtime provisioning", () => {
     output.error.mockClear();
     const failure = new Error("bootstrap failed: input/output error");
     const root = path.join(storage, "local-models");
-    const plist = path.join(temporary, "Library", "LaunchAgents", "com.nesweep.local-models.plist");
+    const plist = path.join(
+      temporary,
+      "Library",
+      "LaunchAgents",
+      "costleya.zetacode.local-models.plist",
+    );
     let launched = false;
     let stopping = false;
     let polls = 0;
@@ -1193,8 +1200,8 @@ describe("managed runtime provisioning", () => {
       if (args[0] === "-convert")
         return {
           stdout: JSON.stringify({
-            Label: "com.nesweep.local-models",
-            NESweepStorageRoot: root,
+            Label: "costleya.zetacode.local-models",
+            zetacodeStorageRoot: root,
             ProgramArguments:
               transition === "replacement plist" && polls >= 2
                 ? [...program.slice(0, 7), "c08fdc0e-a3b6-4873-977b-588b89033fba"]
@@ -1261,7 +1268,7 @@ describe("managed runtime provisioning", () => {
         temporary,
         "Library",
         "LaunchAgents",
-        "com.nesweep.local-models.plist",
+        "costleya.zetacode.local-models.plist",
       );
       await fs.mkdir(path.dirname(plist), { recursive: true });
       await fs.writeFile(plist, "unrecognized registration");
@@ -1271,8 +1278,8 @@ describe("managed runtime provisioning", () => {
             ? "12.8.1\n"
             : args[0] === "-convert"
               ? JSON.stringify({
-                  Label: "com.nesweep.local-models",
-                  NESweepStorageRoot: root,
+                  Label: "costleya.zetacode.local-models",
+                  zetacodeStorageRoot: root,
                   ProgramArguments: currentProgramArguments(root, entry),
                 })
               : "",
@@ -1297,7 +1304,12 @@ describe("managed runtime provisioning", () => {
     "other source interpreter",
   ])("preserves an existing service with mismatched %s", async (mismatch) => {
     const root = path.join(storage, "local-models");
-    const plist = path.join(temporary, "Library", "LaunchAgents", "com.nesweep.local-models.plist");
+    const plist = path.join(
+      temporary,
+      "Library",
+      "LaunchAgents",
+      "costleya.zetacode.local-models.plist",
+    );
     await fs.mkdir(path.dirname(plist), { recursive: true });
     const contents = "unowned registration";
     if (mismatch === "symlink plist") {
@@ -1331,8 +1343,8 @@ describe("managed runtime provisioning", () => {
           ? "12.8.1\n"
           : args[0] === "-convert"
             ? JSON.stringify({
-                Label: "com.nesweep.local-models",
-                NESweepStorageRoot:
+                Label: "costleya.zetacode.local-models",
+                zetacodeStorageRoot:
                   mismatch === "storage root" ? path.join(temporary, "other") : root,
                 ProgramArguments: program,
               })
@@ -1361,7 +1373,7 @@ describe("managed runtime provisioning", () => {
             : "",
       stderr: "",
     }));
-    await expect(manager().ensureReady()).rejects.toThrow(/without NESweep ownership metadata/);
+    await expect(manager().ensureReady()).rejects.toThrow(/without zetacode ownership metadata/);
     expect(processes.spawn).not.toHaveBeenCalled();
     expect(
       processes.execute.mock.calls.some(
@@ -1385,7 +1397,7 @@ describe("managed runtime provisioning", () => {
         temporary,
         "Library",
         "LaunchAgents",
-        "com.nesweep.local-models.plist",
+        "costleya.zetacode.local-models.plist",
       );
       const checkpoint = path.join(root, "huggingface", "checkpoint");
       await fs.mkdir(path.dirname(checkpoint), { recursive: true });
@@ -1413,8 +1425,8 @@ describe("managed runtime provisioning", () => {
         if (args[0] === "-convert")
           return {
             stdout: JSON.stringify({
-              Label: "com.nesweep.local-models",
-              NESweepStorageRoot: root,
+              Label: "costleya.zetacode.local-models",
+              zetacodeStorageRoot: root,
               ProgramArguments: program,
             }),
             stderr: "",
@@ -1433,7 +1445,12 @@ describe("managed runtime provisioning", () => {
       const bootouts = processes.execute.mock.calls.filter(([, args]) => args[0] === "bootout");
       expect(bootouts).toEqual(
         matching
-          ? [["/bin/launchctl", ["bootout", `gui/${process.getuid!()}/com.nesweep.local-models`]]]
+          ? [
+              [
+                "/bin/launchctl",
+                ["bootout", `gui/${process.getuid!()}/costleya.zetacode.local-models`],
+              ],
+            ]
           : [],
       );
       await expect(fs.stat(path.join(root, "setup.lock.released"))).resolves.toBeDefined();

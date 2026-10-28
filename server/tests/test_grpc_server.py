@@ -99,7 +99,7 @@ class GrpcServerTests(unittest.TestCase):
         complete()
 
         roots = [span for span in exporter.get_finished_spans()
-                 if span.name == "nesweep.CompletionService/Complete"]
+                 if span.name == "zetacode.CompletionService/Complete"]
         self.assertEqual(len(roots), 3)
         valid = next(
             span for span in roots
@@ -213,10 +213,10 @@ class GrpcServerTests(unittest.TestCase):
         self.assertCountEqual(
             [
                 (span.name, cast(Mapping[str, AnyValue], span.attributes).get(
-                    "nesweep.outcome"))
+                    "zetacode.outcome"))
                 for span in spans
             ],
-            [("nesweep.CompletionService/Complete", "cancelled"),
+            [("zetacode.CompletionService/Complete", "cancelled"),
              ("completion.generate", "cancelled")])
         for span in spans:
             self.assertNotIn("deadline expired", repr((span.name, span.attributes, span.events)))
@@ -333,7 +333,7 @@ class GrpcServerTests(unittest.TestCase):
             "RuntimeError",
         )
         self.assertEqual(generation.status.status_code, StatusCode.ERROR)
-        self.assertTrue(any(span.name == "nesweep.CompletionService/Complete"
+        self.assertTrue(any(span.name == "zetacode.CompletionService/Complete"
                             for span in spans))
         for span in spans:
             self.assertNotIn("private model path",

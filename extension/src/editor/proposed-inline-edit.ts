@@ -29,7 +29,7 @@ export function registerInlineCompletionItemProviderWithMetadata(
     )
       throw error;
     throw new Error(
-      "NESweep requires VS Code's native inline edit API. If your VS Code version requires proposed API access, start it with --enable-proposed-api=s-obvious.nesweep. See the NESweep README for setup.",
+      "zetacode requires VS Code's native inline edit API. If your VS Code version requires proposed API access, start it with --enable-proposed-api=costleya.zetacode. See the zetacode README for setup.",
       { cause: error },
     );
   }

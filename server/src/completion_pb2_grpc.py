@@ -35,12 +35,12 @@ class CompletionServiceStub:
             channel: A grpc.Channel.
         """
         self.Complete = channel.unary_stream(
-                '/nesweep.CompletionService/Complete',
+                '/zetacode.CompletionService/Complete',
                 request_serializer=completion__pb2.CompletionRequest.SerializeToString,
                 response_deserializer=completion__pb2.CompletionEvent.FromString,
                 _registered_method=True)
         self.Health = channel.unary_unary(
-                '/nesweep.CompletionService/Health',
+                '/zetacode.CompletionService/Health',
                 request_serializer=completion__pb2.HealthRequest.SerializeToString,
                 response_deserializer=completion__pb2.HealthResponse.FromString,
                 _registered_method=True)
@@ -76,9 +76,9 @@ def add_CompletionServiceServicer_to_server(servicer, server):
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'nesweep.CompletionService', rpc_method_handlers)
+            'zetacode.CompletionService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('nesweep.CompletionService', rpc_method_handlers)
+    server.add_registered_method_handlers('zetacode.CompletionService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
@@ -99,7 +99,7 @@ class CompletionService:
         return grpc.experimental.unary_stream(
             request,
             target,
-            '/nesweep.CompletionService/Complete',
+            '/zetacode.CompletionService/Complete',
             completion__pb2.CompletionRequest.SerializeToString,
             completion__pb2.CompletionEvent.FromString,
             options,
@@ -126,7 +126,7 @@ class CompletionService:
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/nesweep.CompletionService/Health',
+            '/zetacode.CompletionService/Health',
             completion__pb2.HealthRequest.SerializeToString,
             completion__pb2.HealthResponse.FromString,
             options,

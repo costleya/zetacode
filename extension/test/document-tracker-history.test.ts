@@ -165,7 +165,7 @@ describe("DocumentTracker history", () => {
     tracker.trackCursorMovement(document, { line: 1, character: 3 } as vscode.Position);
     await tracker.flush();
 
-    const saved = storage.values.get("sweep.tracker.v2") as {
+    const saved = storage.values.get("zetacode.tracker.v2") as {
       version: number;
       recentFiles: Array<Record<string, unknown>>;
       cursorPositions: unknown[];
@@ -200,7 +200,7 @@ describe("DocumentTracker history", () => {
     const storage = makeContext(
       new Map([
         [
-          "sweep.tracker.v2",
+          "zetacode.tracker.v2",
           {
             version: 2,
             recentFiles: [{ uri: path, timestamp: 10 }],
@@ -235,7 +235,7 @@ describe("DocumentTracker history", () => {
 
     expect(tracker.getRecentContextFiles("", 10)).toEqual([]);
     expect(
-      (storage.values.get("sweep.tracker.v2") as { recentFiles: unknown[] }).recentFiles,
+      (storage.values.get("zetacode.tracker.v2") as { recentFiles: unknown[] }).recentFiles,
     ).toEqual([]);
     tracker.dispose();
   });
@@ -349,7 +349,7 @@ describe("DocumentTracker history", () => {
     const storage = makeContext(
       new Map([
         [
-          "sweep.tracker.v1",
+          "zetacode.tracker.v1",
           {
             version: 1,
             editHistory: [
@@ -371,11 +371,11 @@ describe("DocumentTracker history", () => {
     const tracker = new DocumentTracker(storage.context);
     await tracker.flush();
 
-    expect(storage.values.has("sweep.tracker.v1")).toBe(false);
+    expect(storage.values.has("zetacode.tracker.v1")).toBe(false);
     expect(tracker.getEditDiffHistory().map((record) => record.timestamp)).toEqual([
       6_000, 5_000, 4_000, 3_000, 2_000, 1_000,
     ]);
-    const saved = storage.values.get("sweep.tracker.v2") as {
+    const saved = storage.values.get("zetacode.tracker.v2") as {
       version: number;
       recentFileEditBuckets: Array<{ filepath: string; records: Array<{ timestamp: number }> }>;
     };

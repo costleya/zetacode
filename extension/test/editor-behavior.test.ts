@@ -131,10 +131,10 @@ describe("editor behavior", () => {
     const provider = {} as vscode.InlineCompletionItemProvider;
 
     registerInlineCompletionItemProviderWithMetadata([], provider, {
-      groupId: "nesweep",
+      groupId: "zetacode",
     }).dispose();
 
-    expect(registration).toHaveBeenCalledExactlyOnceWith([], provider, { groupId: "nesweep" });
+    expect(registration).toHaveBeenCalledExactlyOnceWith([], provider, { groupId: "zetacode" });
   });
 
   test("reports an actionable setup error when native registration is denied without retrying", () => {

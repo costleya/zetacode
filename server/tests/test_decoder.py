@@ -365,7 +365,7 @@ class DecoderTests(unittest.TestCase):
             spans = exporter.get_finished_spans()
             self.assertEqual({span.name for span in spans}, {
                 "decoder.prefill", "decoder.decode"})
-            self.assertTrue(all(cast(dict[str, Any], span.attributes)["nesweep.outcome"] == "success"
+            self.assertTrue(all(cast(dict[str, Any], span.attributes)["zetacode.outcome"] == "success"
                                 for span in spans))
         finally:
             observability.shutdown_tracing()

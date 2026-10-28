@@ -24,7 +24,7 @@ describe("completion server readiness", () => {
     });
     const provision = vi.fn(() => pending);
     const ping = vi.spyOn(CompletionClient.prototype, "ping").mockResolvedValue(true);
-    const server = new CompletionServer("/tmp/nesweep-tests/server.sock", provision);
+    const server = new CompletionServer("/tmp/zetacode-tests/server.sock", provision);
 
     const reachable = server.ensureReachable();
     expect(provision).toHaveBeenCalledOnce();
@@ -40,7 +40,7 @@ describe("completion server readiness", () => {
     const failure = new Error("Install uv to set up the local model server");
     const ping = vi.spyOn(CompletionClient.prototype, "ping").mockResolvedValue(true);
     const provision = vi.fn(() => Promise.reject(failure));
-    const server = new CompletionServer("/tmp/nesweep-tests/server.sock", provision);
+    const server = new CompletionServer("/tmp/zetacode-tests/server.sock", provision);
 
     await expect(server.waitUntilReady()).rejects.toBe(failure);
     expect(provision).toHaveBeenCalledWith(false);
@@ -84,7 +84,7 @@ describe("completion server readiness", () => {
 
 describe("completion server channel ownership", () => {
   test("reuses its client and closes the channel on server disposal", () => {
-    const server = new CompletionServer("/tmp/nesweep-tests/lifecycle.sock");
+    const server = new CompletionServer("/tmp/zetacode-tests/lifecycle.sock");
     const client = server.getClient();
     const close = vi.spyOn(client, "dispose");
     expect(server.getClient()).toBe(client);

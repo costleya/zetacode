@@ -46,7 +46,7 @@ class PackageLayoutTests(unittest.TestCase):
             "server/src/nested/direct.pyc",
             "server/src/nested/direct.pyo",
         }
-        with tempfile.TemporaryDirectory(prefix="nesweep-package-layout-") as directory:
+        with tempfile.TemporaryDirectory(prefix="zetacode-package-layout-") as directory:
             fixture = Path(directory) / "checkout"
             stage = Path(directory) / "stage"
             (fixture / "extension").mkdir(parents=True)

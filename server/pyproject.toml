@@ -1,5 +1,5 @@
 [project]
-name = "nesweep-zeta-server"
+name = "zetacode-zeta-server"
 version = "0.1.0"
 description = "Standalone MLX source-verification server for Zeta 2.1"
 requires-python = ">=3.13,<3.14"

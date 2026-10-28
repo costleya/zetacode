@@ -24,27 +24,27 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x63ompletion.proto\x12\x07nesweep\"\xec\x01\n\x11\x43ompletionRequest\x12\r\n\x05model\x18\x01 \x01(\t\x12\x0e\n\x06prompt\x18\x02 \x01(\t\x12\x13\n\x0btemperature\x18\x03 \x01(\x01\x12\x1b\n\x0erepeat_penalty\x18\x04 \x01(\x01H\x00\x88\x01\x01\x12\x17\n\nmax_tokens\x18\x05 \x01(\x05H\x01\x88\x01\x01\x12\x0c\n\x04stop\x18\x06 \x03(\t\x12\x1a\n\x12notify_first_token\x18\x07 \x01(\x08\x12!\n\x19notify_no_edit_impossible\x18\x08 \x01(\x08\x42\x11\n\x0f_repeat_penaltyB\r\n\x0b_max_tokens\"\x0c\n\nFirstToken\"\x12\n\x10NoEditImpossible\"\x95\x01\n\x10\x43ompletionResult\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x15\n\rfinish_reason\x18\x02 \x01(\t\x12\x1e\n\x11prompt_eval_count\x18\x03 \x01(\x05H\x00\x88\x01\x01\x12\x17\n\neval_count\x18\x04 \x01(\x05H\x01\x88\x01\x01\x42\x14\n\x12_prompt_eval_countB\r\n\x0b_eval_count\"\xb2\x01\n\x0f\x43ompletionEvent\x12*\n\x0b\x66irst_token\x18\x01 \x01(\x0b\x32\x13.nesweep.FirstTokenH\x00\x12\x37\n\x12no_edit_impossible\x18\x02 \x01(\x0b\x32\x19.nesweep.NoEditImpossibleH\x00\x12\x31\n\x0c\x66inal_result\x18\x03 \x01(\x0b\x32\x19.nesweep.CompletionResultH\x00\x42\x07\n\x05\x65vent\"\x0f\n\rHealthRequest\"/\n\x0eHealthResponse\x12\r\n\x05ready\x18\x01 \x01(\x08\x12\x0e\n\x06models\x18\x02 \x03(\t2\x92\x01\n\x11\x43ompletionService\x12\x42\n\x08\x43omplete\x12\x1a.nesweep.CompletionRequest\x1a\x18.nesweep.CompletionEvent0\x01\x12\x39\n\x06Health\x12\x16.nesweep.HealthRequest\x1a\x17.nesweep.HealthResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x63ompletion.proto\x12\x08zetacode\"\xec\x01\n\x11\x43ompletionRequest\x12\r\n\x05model\x18\x01 \x01(\t\x12\x0e\n\x06prompt\x18\x02 \x01(\t\x12\x13\n\x0btemperature\x18\x03 \x01(\x01\x12\x1b\n\x0erepeat_penalty\x18\x04 \x01(\x01H\x00\x88\x01\x01\x12\x17\n\nmax_tokens\x18\x05 \x01(\x05H\x01\x88\x01\x01\x12\x0c\n\x04stop\x18\x06 \x03(\t\x12\x1a\n\x12notify_first_token\x18\x07 \x01(\x08\x12!\n\x19notify_no_edit_impossible\x18\x08 \x01(\x08\x42\x11\n\x0f_repeat_penaltyB\r\n\x0b_max_tokens\"\x0c\n\nFirstToken\"\x12\n\x10NoEditImpossible\"\x95\x01\n\x10\x43ompletionResult\x12\x0c\n\x04text\x18\x01 \x01(\t\x12\x15\n\rfinish_reason\x18\x02 \x01(\t\x12\x1e\n\x11prompt_eval_count\x18\x03 \x01(\x05H\x00\x88\x01\x01\x12\x17\n\neval_count\x18\x04 \x01(\x05H\x01\x88\x01\x01\x42\x14\n\x12_prompt_eval_countB\r\n\x0b_eval_count\"\xb5\x01\n\x0f\x43ompletionEvent\x12+\n\x0b\x66irst_token\x18\x01 \x01(\x0b\x32\x14.zetacode.FirstTokenH\x00\x12\x38\n\x12no_edit_impossible\x18\x02 \x01(\x0b\x32\x1a.zetacode.NoEditImpossibleH\x00\x12\x32\n\x0c\x66inal_result\x18\x03 \x01(\x0b\x32\x1a.zetacode.CompletionResultH\x00\x42\x07\n\x05\x65vent\"\x0f\n\rHealthRequest\"/\n\x0eHealthResponse\x12\r\n\x05ready\x18\x01 \x01(\x08\x12\x0e\n\x06models\x18\x02 \x03(\t2\x96\x01\n\x11\x43ompletionService\x12\x44\n\x08\x43omplete\x12\x1b.zetacode.CompletionRequest\x1a\x19.zetacode.CompletionEvent0\x01\x12;\n\x06Health\x12\x17.zetacode.HealthRequest\x1a\x18.zetacode.HealthResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'completion_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_COMPLETIONREQUEST']._serialized_start=30
-  _globals['_COMPLETIONREQUEST']._serialized_end=266
-  _globals['_FIRSTTOKEN']._serialized_start=268
-  _globals['_FIRSTTOKEN']._serialized_end=280
-  _globals['_NOEDITIMPOSSIBLE']._serialized_start=282
-  _globals['_NOEDITIMPOSSIBLE']._serialized_end=300
-  _globals['_COMPLETIONRESULT']._serialized_start=303
-  _globals['_COMPLETIONRESULT']._serialized_end=452
-  _globals['_COMPLETIONEVENT']._serialized_start=455
-  _globals['_COMPLETIONEVENT']._serialized_end=633
-  _globals['_HEALTHREQUEST']._serialized_start=635
-  _globals['_HEALTHREQUEST']._serialized_end=650
-  _globals['_HEALTHRESPONSE']._serialized_start=652
-  _globals['_HEALTHRESPONSE']._serialized_end=699
-  _globals['_COMPLETIONSERVICE']._serialized_start=702
-  _globals['_COMPLETIONSERVICE']._serialized_end=848
+  _globals['_COMPLETIONREQUEST']._serialized_start=31
+  _globals['_COMPLETIONREQUEST']._serialized_end=267
+  _globals['_FIRSTTOKEN']._serialized_start=269
+  _globals['_FIRSTTOKEN']._serialized_end=281
+  _globals['_NOEDITIMPOSSIBLE']._serialized_start=283
+  _globals['_NOEDITIMPOSSIBLE']._serialized_end=301
+  _globals['_COMPLETIONRESULT']._serialized_start=304
+  _globals['_COMPLETIONRESULT']._serialized_end=453
+  _globals['_COMPLETIONEVENT']._serialized_start=456
+  _globals['_COMPLETIONEVENT']._serialized_end=637
+  _globals['_HEALTHREQUEST']._serialized_start=639
+  _globals['_HEALTHREQUEST']._serialized_end=654
+  _globals['_HEALTHRESPONSE']._serialized_start=656
+  _globals['_HEALTHRESPONSE']._serialized_end=703
+  _globals['_COMPLETIONSERVICE']._serialized_start=706
+  _globals['_COMPLETIONSERVICE']._serialized_end=856
 # @@protoc_insertion_point(module_scope)

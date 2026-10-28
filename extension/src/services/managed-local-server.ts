@@ -11,7 +11,7 @@ import { getLocalRuntimeSocketPath } from "~/core/local-runtime.ts";
 import { formatManagedSetupStatus, parseManagedSetupStatus } from "./managed-setup-status.ts";
 
 const execute = promisify(execFile);
-export const MANAGED_SERVER_LABEL = "com.nesweep.local-models";
+export const MANAGED_SERVER_LABEL = "costleya.zetacode.local-models";
 export const HELPER_MANIFESTS = [
   "pyproject.toml",
   "pylock.toml",
@@ -65,7 +65,7 @@ export async function findPnpm(): Promise<string> {
     }
   }
   throw new Error(
-    "Install Node.js 24 and pnpm 12.8.1 or newer, ensure pnpm is available to VS Code, and reload. NESweep does not install these tools automatically.",
+    "Install Node.js 24 and pnpm 12.8.1 or newer, ensure pnpm is available to VS Code, and reload. zetacode does not install these tools automatically.",
   );
 }
 
@@ -99,7 +99,7 @@ export class ManagedLocalServer implements vscode.Disposable {
   }
 
   ensureReady(retry = false): Promise<void> {
-    if (this.disposed) return Promise.reject(new Error("NESweep local setup was disposed."));
+    if (this.disposed) return Promise.reject(new Error("zetacode local setup was disposed."));
     if (this.pending) return this.pending;
     if (retry) this.failure = undefined;
     if (this.failure) return Promise.reject(this.failure);
@@ -168,7 +168,7 @@ export class ManagedLocalServer implements vscode.Disposable {
       controller.signal.throwIfAborted();
       if (os.platform() !== "darwin" || os.arch() !== "arm64") {
         throw new Error(
-          "NESweep requires Apple Silicon macOS to run its bundled Zeta and Qwen models.",
+          "zetacode requires Apple Silicon macOS to run its bundled Zeta and Qwen models.",
         );
       }
       const healthy = await this.healthy(controller.signal);
@@ -177,7 +177,7 @@ export class ManagedLocalServer implements vscode.Disposable {
       await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
-          title: "NESweep: preparing local Zeta and Qwen models",
+          title: "zetacode: preparing local Zeta and Qwen models",
           cancellable: true,
         },
         async (progress, token) => {
@@ -206,12 +206,12 @@ export class ManagedLocalServer implements vscode.Disposable {
     } catch (error) {
       if (controller.signal.aborted)
         throw new Error(
-          "NESweep local model setup cancelled. Reload VS Code or use Check Local Models to retry.",
+          "zetacode local model setup cancelled. Reload VS Code or use Check Local Models to retry.",
         );
       this.output.error("Local model setup failed", error);
       void vscode.window
         .showErrorMessage(
-          `NESweep: ${error instanceof Error ? error.message : String(error)} See NESweep Output for details.`,
+          `zetacode: ${error instanceof Error ? error.message : String(error)} See zetacode Output for details.`,
           "Show Output",
         )
         .then((action) => {
@@ -262,7 +262,7 @@ export class ManagedLocalServer implements vscode.Disposable {
       const loaded = await this.loadedService(service);
       if (loaded && !current)
         throw new Error(
-          `LaunchAgent ${service} already exists without NESweep ownership metadata. Remove the conflicting agent manually, then use Check Local Models to retry.`,
+          `LaunchAgent ${service} already exists without zetacode ownership metadata. Remove the conflicting agent manually, then use Check Local Models to retry.`,
         );
       if (loaded && current) this.validateLoadedService(loaded, current);
       report("Installing the locked Python runtime and dependencies (first setup needs internet)…");
@@ -323,7 +323,7 @@ export class ManagedLocalServer implements vscode.Disposable {
           report(message, `${status.stage}:${status.model ?? "all"}`);
         } else {
           report(
-            "Waiting for local model startup; checking downloads and loading. See NESweep Output and server.log for details…",
+            "Waiting for local model startup; checking downloads and loading. See zetacode Output and server.log for details…",
           );
         }
         if (Date.now() >= deadline)
@@ -463,7 +463,7 @@ export class ManagedLocalServer implements vscode.Disposable {
     ];
     return `<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0"><dict>
 <key>Label</key><string>${MANAGED_SERVER_LABEL}</string>
-<key>NESweepStorageRoot</key><string>${escapePlist(root)}</string>
+<key>zetacodeStorageRoot</key><string>${escapePlist(root)}</string>
 <key>ProgramArguments</key><array>${args.map((arg) => `<string>${escapePlist(arg)}</string>`).join("")}</array>
 <key>EnvironmentVariables</key><dict>${variables.map((key) => `<key>${key}</key><string>${escapePlist(environment[key] ?? "")}</string>`).join("")}</dict>
 <key>RunAtLoad</key><true/><key>KeepAlive</key><true/>
@@ -487,13 +487,13 @@ export class ManagedLocalServer implements vscode.Disposable {
     const { stdout } = await execute("/usr/bin/plutil", ["-convert", "json", "-o", "-", file]);
     const value = JSON.parse(stdout) as {
       Label?: string;
-      NESweepStorageRoot?: string;
+      zetacodeStorageRoot?: string;
       ProgramArguments?: unknown;
     };
     const args = value.ProgramArguments;
     if (
       value.Label !== MANAGED_SERVER_LABEL ||
-      value.NESweepStorageRoot !== root ||
+      value.zetacodeStorageRoot !== root ||
       !Array.isArray(args) ||
       args.length !== 8 ||
       typeof args[1] !== "string" ||
@@ -531,7 +531,7 @@ export class ManagedLocalServer implements vscode.Disposable {
     // launchctl's program and argument records must identify the owned runtime.
     if (!output.includes(`program = ${args[0]}`) || !args.every((arg) => output.includes(arg))) {
       throw new Error(
-        "Refusing to stop a LaunchAgent whose running program does not match NESweep's managed runtime.",
+        "Refusing to stop a LaunchAgent whose running program does not match zetacode's managed runtime.",
       );
     }
   }
@@ -552,7 +552,7 @@ export class ManagedLocalServer implements vscode.Disposable {
       this.validateLoadedService(loaded, args);
       if (Date.now() >= deadline) {
         throw new Error(
-          "The previous NESweep local model service did not finish stopping. Use Check Local Models to retry.",
+          "The previous zetacode local model service did not finish stopping. Use Check Local Models to retry.",
         );
       }
       await this.delay(100, signal);
@@ -602,7 +602,7 @@ export class ManagedLocalServer implements vscode.Disposable {
         else
           reject(
             new Error(
-              `Python dependency setup exited with ${code}; check NESweep Output and internet connectivity.`,
+              `Python dependency setup exited with ${code}; check zetacode Output and internet connectivity.`,
             ),
           );
       });
@@ -621,7 +621,7 @@ export class ManagedLocalServer implements vscode.Disposable {
       signal.throwIfAborted();
       if (Date.now() > deadline)
         throw new Error(
-          `Another window is still preparing models. Check ${root} and NESweep Output before retrying.`,
+          `Another window is still preparing models. Check ${root} and zetacode Output before retrying.`,
         );
       const generation = await this.highestLockGeneration(root);
       const previous = generation === undefined ? undefined : this.lockPath(root, generation);
@@ -629,7 +629,7 @@ export class ManagedLocalServer implements vscode.Disposable {
         const next = generation === undefined ? 0 : generation + 1;
         if (next > 10_000)
           throw new Error(
-            `NESweep setup lock history at ${root} reached its safety limit. Close all VS Code windows before clearing setup.lock metadata files.`,
+            `zetacode setup lock history at ${root} reached its safety limit. Close all VS Code windows before clearing setup.lock metadata files.`,
           );
         const file = this.lockPath(root, next);
         signal.throwIfAborted();
@@ -667,7 +667,7 @@ export class ManagedLocalServer implements vscode.Disposable {
     for await (const entry of directory) {
       if (++entries > 30_100)
         throw new Error(
-          `NESweep storage at ${root} contains too many metadata entries; inspect it before retrying setup.`,
+          `zetacode storage at ${root} contains too many metadata entries; inspect it before retrying setup.`,
         );
       // Publication temporaries, release markers and legacy recovery files do
       // not participate in ownership or generation selection.
@@ -676,7 +676,7 @@ export class ManagedLocalServer implements vscode.Disposable {
       const generation = match[1] === undefined ? 0 : Number(match[1]);
       if (!Number.isSafeInteger(generation) || generation > 10_000)
         throw new Error(
-          `Unrecognized NESweep setup lock generation at ${root}. Inspect the metadata before retrying.`,
+          `Unrecognized zetacode setup lock generation at ${root}. Inspect the metadata before retrying.`,
         );
       highest = Math.max(highest ?? 0, generation);
     }

@@ -7,7 +7,7 @@
       "request": "launch",
       "args": [
         "--extensionDevelopmentPath=${workspaceFolder}/extension",
-        "--enable-proposed-api=s-obvious.nesweep"
+        "--enable-proposed-api=costleya.zetacode"
       ],
       "outFiles": ["${workspaceFolder}/extension/out/**/*.mjs"],
       "preLaunchTask": "Build extension"

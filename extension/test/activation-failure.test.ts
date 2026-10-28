@@ -57,7 +57,7 @@ vi.mock("~/editor/inline-edit-provider.ts", () => ({
   },
 }));
 vi.mock("~/extension/status-bar.ts", () => ({
-  SweepStatusBar: class {
+  ZetacodeStatusBar: class {
     dispose = resources.status;
   },
   registerStatusBarCommands: vi.fn(),

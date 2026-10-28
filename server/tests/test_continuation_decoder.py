@@ -645,7 +645,7 @@ class ContinuationDecoderTests(unittest.TestCase):
             self.assertEqual({span.name for span in spans}, {
                 "decoder.prefill", "decoder.decode"})
             self.assertTrue(all(span.attributes is not None
-                                and span.attributes["nesweep.outcome"] == "success"
+                                and span.attributes["zetacode.outcome"] == "success"
                                 for span in spans))
         finally:
             observability.shutdown_tracing()

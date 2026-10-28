@@ -4,7 +4,7 @@ import * as vscode from "vscode";
 import { DocumentTracker } from "~/telemetry/document-tracker.ts";
 import { continuationDocument } from "./fixtures/continuation-document.ts";
 
-const stateKey = "sweep.tracker.v2";
+const stateKey = "zetacode.tracker.v2";
 const trackers: DocumentTracker[] = [];
 const initialDocuments = vscode.workspace.textDocuments;
 const statMock = vi.fn<(uri: vscode.Uri) => Promise<vscode.FileStat>>();

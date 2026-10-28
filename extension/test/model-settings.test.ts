@@ -31,7 +31,7 @@ describe("model settings", () => {
       "continuationModelName",
       "continuationFallbackEnabled",
     ]) {
-      expect(Object.keys(properties)).not.toContain(`sweep.${setting}`);
+      expect(Object.keys(properties)).not.toContain(`zetacode.${setting}`);
       expect(config).not.toHaveProperty(setting);
     }
   });

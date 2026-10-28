@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 class CodegenTests(unittest.TestCase):
     def test_codegen_resolves_inputs_and_outputs_from_the_server_directory(self):
-        with tempfile.TemporaryDirectory(prefix="nesweep codegen ") as directory:
+        with tempfile.TemporaryDirectory(prefix="zetacode codegen ") as directory:
             temporary = Path(directory)
             checkout = temporary / "checkout with spaces"
             for relative in (
@@ -66,7 +66,7 @@ class CodegenTests(unittest.TestCase):
                     assert output == root / "extension/src/api/generated" and output.is_dir(), output
                     (output / "completion.ts").write_text("generated fixture\\n")
                 else:
-                    assert args[:5] == ["--filter", "nesweep", "exec", "vp", "fmt"], args
+                    assert args[:5] == ["--filter", "zetacode", "exec", "vp", "fmt"], args
                     os.chdir(root / "extension")
                     generated = Path(args[5]).resolve()
                     assert generated == root / "extension/src/api/generated/completion.ts", generated

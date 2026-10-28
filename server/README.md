@@ -1,11 +1,11 @@
 # Bundled Zeta and Qwen runtime
 
-NESweep automatically stages and starts this packaged runtime on Apple Silicon
+zetacode automatically stages and starts this packaged runtime on Apple Silicon
 macOS. The extension uses typed gRPC over a private Unix socket and the fixed model IDs
 `zeta-2.1` and `qwen2.5-coder-7b-instruct`. It downloads model weights from
-Hugging Face; the weights are not bundled. Install Node.js 24 and pnpm 12.8.1 or newer before activating NESweep.
+Hugging Face; the weights are not bundled. Install Node.js 24 and pnpm 12.8.1 or newer before activating zetacode.
 Use **Check Local Models** in the extension menu to prepare or retry setup.
-Managed startup passes `--socket-path /tmp/nesweep-UID/STORAGE_HASH.sock`, using
+Managed startup passes `--socket-path /tmp/zetacode-UID/STORAGE_HASH.sock`, using
 the first 16 hexadecimal characters of the resolved storage root's SHA-256 hash.
 The parent directory must be owned by the current user with mode `0700`; the
 server creates it if absent and sets the socket to `0600`. A persistent `.lock`
@@ -24,7 +24,7 @@ then run from this checkout:
 
 ```sh
 pnpm install --frozen-lockfile
-server/run.sh --socket-path "/tmp/nesweep-$(id -u)/developer.sock"
+server/run.sh --socket-path "/tmp/zetacode-$(id -u)/developer.sock"
 ```
 
 Runtime Python modules live in `src/`; the launcher runs `src/server.py`.
@@ -70,7 +70,7 @@ with the locked dependencies installed; this bypasses pnpm.
 
 The CLI requires `--socket-path ABSOLUTE_PATH`. Socket paths must fit within
 103 encoded bytes. The runtime listens only on that private Unix socket.
-The canonical schema is `proto/completion.proto`. `nesweep.CompletionService`
+The canonical schema is `proto/completion.proto`. `zetacode.CompletionService`
 provides unary `Health` (ready plus both model IDs) and server-streaming `Complete`.
 Health becomes ready only after both models load. Complete accepts the model ID,
 nonempty prompt, temperature, repetition penalty, token budget, stop strings, and
@@ -197,13 +197,13 @@ prefix and stop cases.
 
 This is a small warm sample, excluding initial model loading and editor context
 collection/rendering. Private measurement artifacts are
-`/private/tmp/nesweep-qwen-optimization/baseline.json`, `early-cancel.json`, and
+`/private/tmp/zetacode-qwen-optimization/baseline.json`, `early-cancel.json`, and
 `noedit-smoke.json` in the same directory.
 
 ## OpenTelemetry tracing
 
 The server uses a private OpenTelemetry SDK provider with resource namespace
-`nesweep` and service name `model-server`. It extracts W3C `traceparent` and
+`zetacode` and service name `model-server`. It extracts W3C `traceparent` and
 `tracestate` from gRPC metadata to connect each Complete server span to the
 extension request. Its generation span includes executor and model-lock waiting;
 prefill and decode spans measure actual decoder phases. A `first_token` event

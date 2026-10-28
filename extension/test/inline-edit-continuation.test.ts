@@ -37,7 +37,7 @@ function createTestTelemetry() {
     shutdown: () => Promise.resolve(),
   };
   const provider = new TracerProvider({
-    resource: resourceFromAttributes({ "service.namespace": "nesweep" }),
+    resource: resourceFromAttributes({ "service.namespace": "zetacode" }),
     spanProcessors: [new SimpleSpanProcessor({ exporter })],
   });
   return { finishedSpans, telemetry: new ExtensionTelemetry(provider) };
@@ -203,7 +203,7 @@ describe("InlineEditProvider nearby rename display", () => {
       expect(result?.items).toHaveLength(1);
       expect(result?.items[0]).toMatchObject({ isInlineEdit: true });
       expect(setDecorations).not.toHaveBeenCalled();
-      const completionSpans = finishedSpans.filter((span) => span.name === "nesweep.completion");
+      const completionSpans = finishedSpans.filter((span) => span.name === "zetacode.completion");
       expect(completionSpans).toHaveLength(1);
       expect(completionSpans[0]?.ended).toBe(true);
       await telemetry.shutdown();
@@ -509,15 +509,15 @@ describe("InlineEditProvider completion trace lifecycle", () => {
     }
 
     expect(getAutocomplete).toHaveBeenCalledTimes(scenario === "build input error" ? 0 : 1);
-    const completionSpans = finishedSpans.filter((span) => span.name === "nesweep.completion");
+    const completionSpans = finishedSpans.filter((span) => span.name === "zetacode.completion");
     expect(completionSpans).toHaveLength(1);
     expect(completionSpans[0]?.ended).toBe(true);
-    expect(completionSpans[0]?.attributes["nesweep.outcome"]).toBe(expectedOutcome);
+    expect(completionSpans[0]?.attributes["zetacode.outcome"]).toBe(expectedOutcome);
     if (scenario === "error" || scenario === "build input error")
       expect(completionSpans[0]?.status.code).toBe(SpanStatusCode.ERROR);
     if (scenario === "build input error") {
       const buildInputSpans = finishedSpans.filter(
-        (span) => span.name === "nesweep.provider.build_input",
+        (span) => span.name === "zetacode.provider.build_input",
       );
       expect(buildInputSpans).toHaveLength(1);
       expect(buildInputSpans[0]?.ended).toBe(true);

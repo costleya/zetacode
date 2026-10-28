@@ -315,7 +315,7 @@ describe("CompletionClient over Unix gRPC", () => {
     },
   );
   test("unavailable Unix endpoint fails completion and readiness", async () => {
-    const client = new CompletionClient({ socketPath: "/tmp/nesweep-grpc-test-nonexistent.sock" });
+    const client = new CompletionClient({ socketPath: "/tmp/zetacode-grpc-test-nonexistent.sock" });
     resources.push({ close: () => client.dispose() });
     await expect(client.complete({ ...options, timeoutMs: 100 })).rejects.toThrow();
     expect(await client.health(undefined, 100)).toBeNull();

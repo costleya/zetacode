@@ -112,7 +112,7 @@ test.each(["abort", "error", "dispose", "deadline"] as const)(
     expect(spans[0]!.status.code).toBe(
       mode === "abort" ? SpanStatusCode.UNSET : SpanStatusCode.ERROR,
     );
-    expect(spans[0]!.attributes["nesweep.outcome"]).toBe(mode === "abort" ? "cancelled" : "error");
+    expect(spans[0]!.attributes["zetacode.outcome"]).toBe(mode === "abort" ? "cancelled" : "error");
     expect(
       JSON.stringify({
         attributes: spans[0]!.attributes,

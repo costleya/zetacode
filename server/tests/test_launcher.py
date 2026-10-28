@@ -8,7 +8,7 @@ import unittest
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOCKET_PATH = "/tmp/nesweep-test/server.sock"
+SOCKET_PATH = "/tmp/zetacode-test/server.sock"
 
 
 class LauncherTests(unittest.TestCase):
@@ -35,7 +35,7 @@ class LauncherTests(unittest.TestCase):
             if not runtime_override:
                 self.assertEqual((temporary / "install").read_text().splitlines(), [
                     "--dir", str(ROOT), "install", "--frozen-lockfile",
-                    "--filter", "nesweep-zeta-server",
+                    "--filter", "zetacode-zeta-server",
                 ])
             else:
                 self.assertFalse((temporary / "install").exists(), "ZETA_PYTHON must bypass pnpm")
@@ -53,12 +53,12 @@ class LauncherTests(unittest.TestCase):
         self.assertFalse(any(".lmstudio" in value for value in arguments))
 
     def test_launcher_preserves_socket_path_with_spaces(self):
-        arguments = self.run_launcher(arguments=["--socket-path", "/tmp/nesweep-test/custom socket.sock"])
+        arguments = self.run_launcher(arguments=["--socket-path", "/tmp/zetacode-test/custom socket.sock"])
         script_index = arguments.index(str(ROOT / "src" / "server.py"))
         self.assertEqual(arguments[script_index + 1:], [
             "--model", "NexVeridian/zeta-2.1-4bit",
             "--qwen-model", "mlx-community/Qwen2.5-Coder-7B-Instruct-4bit",
-            "--socket-path", "/tmp/nesweep-test/custom socket.sock"])
+            "--socket-path", "/tmp/zetacode-test/custom socket.sock"])
         self.assertNotIn("--port", arguments)
 
     def test_python_and_both_model_overrides_preserve_paths_with_spaces(self):

@@ -46,7 +46,7 @@ export class CompletionServer implements vscode.Disposable {
     if (this.lastWarning && now - this.lastWarning < 60000) return;
     this.lastWarning = now;
     void vscode.window.showWarningMessage(
-      "NESweep could not reach its local model. Check the NESweep output for details.",
+      "zetacode could not reach its local model. Check the zetacode output for details.",
     );
   }
   dispose(): void {

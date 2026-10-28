@@ -44,12 +44,12 @@ const client = new CompletionClient({ socketPath });
 const exporter = new InMemorySpanExporter();
 const provider = new TracerProvider({
   resource: resourceFromAttributes({
-    "service.namespace": "nesweep",
+    "service.namespace": "zetacode",
     "service.name": "vscode-extension",
   }),
   spanProcessors: [new SimpleSpanProcessor({ exporter })],
 });
-const tracer = provider.getTracer("nesweep.integration");
+const tracer = provider.getTracer("zetacode.integration");
 let stopped = false;
 async function stop() {
   if (stopped) return;
@@ -67,8 +67,8 @@ try {
   ]);
   assert.equal(ready.ready, true);
   const roots = [
-    tracer.startSpan("nesweep.completion", {}, ROOT_CONTEXT),
-    tracer.startSpan("nesweep.completion", {}, ROOT_CONTEXT),
+    tracer.startSpan("zetacode.completion", {}, ROOT_CONTEXT),
+    tracer.startSpan("zetacode.completion", {}, ROOT_CONTEXT),
   ];
   try {
     const results = await Promise.all(
@@ -128,10 +128,10 @@ try {
       assert.equal(phase.parentSpanId, generation.spanId);
     }
     for (const span of remote) {
-      assert.equal(span.resource["service.namespace"], "nesweep");
+      assert.equal(span.resource["service.namespace"], "zetacode");
       assert.equal(span.resource["service.name"], "model-server");
     }
-    assert.equal(rpc[0]!.resource.attributes["service.namespace"], "nesweep");
+    assert.equal(rpc[0]!.resource.attributes["service.namespace"], "zetacode");
     assert.equal(rpc[0]!.resource.attributes["service.name"], "vscode-extension");
   }
   const exported = JSON.stringify([

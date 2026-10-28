@@ -1,15 +1,15 @@
 {
-  "name": "nesweep-workspace",
+  "name": "zetacode-workspace",
   "private": true,
   "packageManager": "pnpm@12.8.1",
   "scripts": {
-    "build": "pnpm typecheck:python && pnpm --filter nesweep build",
-    "typecheck": "pnpm typecheck:python && pnpm --filter nesweep typecheck && extension/node_modules/.bin/vp lint --type-aware --type-check tools/*.mts",
-    "lint": "pnpm typecheck:python && pnpm --filter nesweep lint",
-    "fix": "pnpm --filter nesweep fix",
-    "format": "pnpm --filter nesweep format",
-    "format:check": "pnpm --filter nesweep format:check",
-    "test": "pnpm --filter nesweep test",
+    "build": "pnpm typecheck:python && pnpm --filter zetacode build",
+    "typecheck": "pnpm typecheck:python && pnpm --filter zetacode typecheck && extension/node_modules/.bin/vp lint --type-aware --type-check tools/*.mts",
+    "lint": "pnpm typecheck:python && pnpm --filter zetacode lint",
+    "fix": "pnpm --filter zetacode fix",
+    "format": "pnpm --filter zetacode format",
+    "format:check": "pnpm --filter zetacode format:check",
+    "test": "pnpm --filter zetacode test",
     "generate:grpc": "sh tools/generate-proto.sh",
     "typecheck:python": "pyright --project pyrightconfig.json",
     "package": "node tools/package-vsix.mts"

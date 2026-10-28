@@ -5,13 +5,13 @@ import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const stage = await mkdtemp(path.join(tmpdir(), "nesweep-vsix-"));
+const stage = await mkdtemp(path.join(tmpdir(), "zetacode-vsix-"));
 try {
   const commands: [string, string[]][] = [
     [process.execPath, [path.join(root, "tools/stage-extension.mts"), root, stage]],
     [
       path.join(root, "extension/node_modules/.bin/vsce"),
-      ["package", "--no-dependencies", "--out", path.join(root, "nesweep.vsix")],
+      ["package", "--no-dependencies", "--out", path.join(root, "zetacode.vsix")],
     ],
   ];
   for (const [command, args] of commands) {

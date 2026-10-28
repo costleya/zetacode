@@ -16,7 +16,7 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 
 exporter = InMemorySpanExporter()
 provider = TracerProvider(resource=Resource.create({
-    'service.namespace': 'nesweep', 'service.name': 'model-server'}))
+    'service.namespace': 'zetacode', 'service.name': 'model-server'}))
 provider.add_span_processor(SimpleSpanProcessor(exporter))
 observability.configure_tracing(provider=provider)
 module = load_server()

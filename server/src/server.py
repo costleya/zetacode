@@ -76,8 +76,8 @@ class CompletionService(completion_pb2_grpc.CompletionServiceServicer):
                  context: grpc.ServicerContext) -> Generator[completion_pb2.CompletionEvent, None, None]:
         parent = observability.extract_metadata(context.invocation_metadata())
         span = observability.start_span(
-            'nesweep.CompletionService/Complete', context=parent, kind=SpanKind.SERVER,
-            attributes={'rpc.system': 'grpc', 'rpc.service': 'nesweep.CompletionService',
+            'zetacode.CompletionService/Complete', context=parent, kind=SpanKind.SERVER,
+            attributes={'rpc.system': 'grpc', 'rpc.service': 'zetacode.CompletionService',
                         'rpc.method': 'Complete'})
         iterator = self._complete(request, context)
         try:
@@ -88,11 +88,11 @@ class CompletionService(completion_pb2_grpc.CompletionServiceServicer):
                     try:
                         event = next(iterator)
                     except StopIteration:
-                        span.set_attribute('nesweep.outcome', 'success')
+                        span.set_attribute('zetacode.outcome', 'success')
                         return
                 yield event
         except GeneratorExit:
-            span.set_attribute('nesweep.outcome', 'cancelled')
+            span.set_attribute('zetacode.outcome', 'cancelled')
             raise
         except BaseException as error:
             # gRPC's concrete synchronous context exposes code(), but its public
@@ -101,9 +101,9 @@ class CompletionService(completion_pb2_grpc.CompletionServiceServicer):
                                getattr(context, 'code', None))
             code = code_method() if callable(code_method) else None
             if code in (grpc.StatusCode.CANCELLED, grpc.StatusCode.DEADLINE_EXCEEDED):
-                span.set_attribute('nesweep.outcome', 'cancelled')
+                span.set_attribute('zetacode.outcome', 'cancelled')
             elif self._shutdown.is_set():
-                span.set_attribute('nesweep.outcome', 'shutdown')
+                span.set_attribute('zetacode.outcome', 'shutdown')
             else:
                 observability.mark_error(span, error)
             if code is not None:
@@ -203,12 +203,12 @@ class CompletionService(completion_pb2_grpc.CompletionServiceServicer):
                         request.prompt, max_tokens=max_tokens, stop=stop, mode='source',
                         draft_size=96, cancelled=is_cancelled, **notifications)
                 observability.record_result(generation_span, result)
-                generation_span.set_attribute('nesweep.outcome', 'success')
+                generation_span.set_attribute('zetacode.outcome', 'success')
                 events.put(('result', result))
             except BaseException as error:
                 if isinstance(error, GenerationCancelled):
                     generation_span.set_attribute(
-                        'nesweep.outcome', 'shutdown' if self._shutdown.is_set() else 'cancelled')
+                        'zetacode.outcome', 'shutdown' if self._shutdown.is_set() else 'cancelled')
                 else:
                     observability.mark_error(generation_span, error)
                 events.put(('error', error))
@@ -223,7 +223,7 @@ class CompletionService(completion_pb2_grpc.CompletionServiceServicer):
         def generation_done(completed: Future[None]) -> None:
             if completed.cancelled():
                 generation_span.set_attribute(
-                    'nesweep.outcome', 'shutdown' if self._shutdown.is_set() else 'cancelled')
+                    'zetacode.outcome', 'shutdown' if self._shutdown.is_set() else 'cancelled')
                 generation_span.end()
 
         future.add_done_callback(generation_done)
