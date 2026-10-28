@@ -1,5 +1,7 @@
 """CPU-only contract tests. Run: server/.venv/bin/python -m unittest discover -s server/tests -v."""
 
+from __future__ import annotations
+
 import gc
 from contextlib import ExitStack, contextmanager, nullcontext
 from concurrent.futures import ThreadPoolExecutor
@@ -11,7 +13,9 @@ import types
 import threading
 import unittest
 import weakref
+from typing import Any, cast
 from unittest.mock import Mock, mock_open, patch
+from importlib.machinery import ModuleSpec
 
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
@@ -19,22 +23,22 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 
 
 class Scalar(int):
-    def item(self):
+    def item(self) -> int:
         return int(self)
 
 
-class Predictions(list):
-    def tolist(self):
+class Predictions(list[int]):
+    def tolist(self) -> list[int]:
         return list(self)
 
 
 class Logits:
     """Only the indexing and argmax surface the decoder consumes."""
 
-    def __init__(self, winners):
+    def __init__(self, winners: list[int]) -> None:
         self.winners = winners
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int | tuple[int, int]) -> Scalar | Predictions:
         if index == (0, -1):
             return Scalar(self.winners[-1])
         if index == 0:
@@ -43,9 +47,9 @@ class Logits:
 
 
 class Cache:
-    def __init__(self):
-        self.tokens = []
-        self.trims = []
+    def __init__(self) -> None:
+        self.tokens: list[int] = []
+        self.trims: list[int] = []
 
     @property
     def nbytes(self):
@@ -55,7 +59,7 @@ class Cache:
         return True
 
 
-def trim_cache(caches, count):
+def trim_cache(caches: list[Cache], count: int) -> None:
     for cache in caches:
         if count < 0 or count > len(cache.tokens):
             raise AssertionError(f"Invalid cache trim: {count}")
@@ -68,10 +72,10 @@ class Tokenizer:
     eos_token_ids = [0]
     eos_token_id = 0
 
-    def encode(self, text):
+    def encode(self, text: str) -> list[int]:
         return list(map(ord, text))
 
-    def decode(self, tokens):
+    def decode(self, tokens: list[int]) -> str:
         return "".join(map(chr, tokens))
 
 
@@ -82,14 +86,19 @@ class TargetModel:
     An incorrect output prefix produces '?' forever, exposing stale KV tokens.
     """
 
-    def __init__(self, responses):
-        self.responses = responses
-        self.calls = []
+    args: Any
+    model_type: str
+    model: Any
+    lm_head: Any
 
-    def __call__(self, inputs, cache):
+    def __init__(self, responses: dict[str, str]) -> None:
+        self.responses = responses
+        self.calls: list[list[int]] = []
+
+    def __call__(self, inputs: tuple[list[int]], cache: list[Cache]) -> Logits:
         batch, = inputs
         self.calls.append(list(batch))
-        winners = []
+        winners: list[int] = []
         for token in batch:
             cache[0].tokens.append(token)
             context = Tokenizer().decode(cache[0].tokens)
@@ -109,36 +118,61 @@ class TargetModel:
 
 def load_decoder():
     # Keep fake MLX local to this import; do not require or shadow an installed runtime.
-    core = types.ModuleType("mlx.core")
-    core.array = lambda value: value
-    core.eval = lambda *values: None
-    core.argmax = lambda value, axis=None: value
-    core.set_cache_limit = lambda value: None
-    core.get_active_memory = lambda: 0
-    core.get_cache_memory = lambda: 0
-    core.get_peak_memory = lambda: 0
-    core.synchronize = lambda: None
-    core.clear_cache = lambda: None
+    core = cast(Any, types.ModuleType("mlx.core"))
+    def identity(value: object) -> object:
+        return value
+
+    def discard(*values: object) -> None:
+        return None
+
+    def argmax(value: object, axis: int | None = None) -> object:
+        return value
+
+    def zero() -> int:
+        return 0
+
+    def stream_factory(device: object) -> object:
+        return object()
+
+    def stream_context(stream: object) -> Any:
+        return nullcontext()
+
+    core.array = identity
+    core.eval = discard
+    core.argmax = argmax
+    core.set_cache_limit = discard
+    core.get_active_memory = zero
+    core.get_cache_memory = zero
+    core.get_peak_memory = zero
+    core.synchronize = discard
+    core.clear_cache = discard
     core.gpu = object()
-    core.new_thread_local_stream = lambda device: object()
-    core.stream = lambda stream: nullcontext()
-    mlx = types.ModuleType("mlx")
+    core.new_thread_local_stream = stream_factory
+    core.stream = stream_context
+    mlx = cast(Any, types.ModuleType("mlx"))
     mlx.core = core
-    lm = types.ModuleType("mlx_lm")
-    lm.load = lambda path: None
-    caches = types.ModuleType("mlx_lm.models.cache")
-    caches.make_prompt_cache = lambda model: [Cache()]
+    lm = cast(Any, types.ModuleType("mlx_lm"))
+    def fake_load(path: str) -> None:
+        return None
+
+    def make_prompt_cache(model: object) -> list[Cache]:
+        return [Cache()]
+
+    lm.load = fake_load
+    caches = cast(Any, types.ModuleType("mlx_lm.models.cache"))
+    caches.make_prompt_cache = make_prompt_cache
     caches.trim_prompt_cache = trim_cache
     modules = {"mlx": mlx, "mlx.core": core, "mlx_lm": lm,
                "mlx_lm.models": types.ModuleType("mlx_lm.models"),
                "mlx_lm.models.cache": caches}
     source = Path(__file__).resolve().parents[1] / "src"
-    spec = importlib.util.spec_from_file_location("zeta_decoder_contract", source / "decoder.py")
+    spec = cast(ModuleSpec, importlib.util.spec_from_file_location(
+        "zeta_decoder_contract", source / "decoder.py"))
     module = importlib.util.module_from_spec(spec)
     with patch.object(sys, "path", [str(source), *sys.path]):
         import observability
         with patch.dict(sys.modules, {**modules, "observability": observability}):
-            spec.loader.exec_module(module)
+            cast(Any, spec.loader).exec_module(module)
     return module
 
 
@@ -147,7 +181,8 @@ decoder_module = load_decoder()
 
 class ResidencyTests(unittest.TestCase):
     @contextmanager
-    def runtime(self, active=4 * 1024**3, ram=64 * 1024**3, recommended=48 * 1024**3):
+    def runtime(self, active: int | str = 4 * 1024**3, ram: int | str = 64 * 1024**3,
+                recommended: int | str = 48 * 1024**3) -> Any:
         mx = types.SimpleNamespace(
             gpu=object(), metal=types.SimpleNamespace(is_available=lambda: True),
             get_active_memory=Mock(return_value=active),
@@ -289,7 +324,8 @@ class PromptLookupTests(unittest.TestCase):
 
 
 class DecoderTests(unittest.TestCase):
-    def make_decoder(self, responses, model_context=None, context_length=None, allocator=None):
+    def make_decoder(self, responses: dict[str, str], model_context: int | None = None,
+                     context_length: Any = None, allocator: Any = None) -> tuple[Any, TargetModel]:
         model = TargetModel(responses)
         if model_context is not None:
             model.args = types.SimpleNamespace(max_position_embeddings=model_context)
@@ -300,7 +336,8 @@ class DecoderTests(unittest.TestCase):
             decoder = decoder_module.Decoder("fake-model", **options)
         return decoder, model
 
-    def assert_response(self, result, prompt, expected, finish="stop"):
+    def assert_response(self, result: dict[str, Any], prompt: str, expected: str,
+                        finish: str = "stop") -> None:
         self.assertEqual(result["text"], expected)
         self.assertEqual(result["tokens"], list(map(ord, expected)))
         self.assertEqual(result["finish_reason"], finish)
@@ -328,7 +365,7 @@ class DecoderTests(unittest.TestCase):
             spans = exporter.get_finished_spans()
             self.assertEqual({span.name for span in spans}, {
                 "decoder.prefill", "decoder.decode"})
-            self.assertTrue(all(span.attributes["nesweep.outcome"] == "success"
+            self.assertTrue(all(cast(dict[str, Any], span.attributes)["nesweep.outcome"] == "success"
                                 for span in spans))
         finally:
             observability.shutdown_tracing()
@@ -387,23 +424,23 @@ class DecoderTests(unittest.TestCase):
 
     def test_llama_prefill_preserves_target_output_for_both_embedding_modes(self):
         class Hidden:
-            def __init__(self, winners):
+            def __init__(self, winners: list[int]) -> None:
                 self.winners = winners
 
-            def __getitem__(self, index):
-                batch, positions, features = index
+            def __getitem__(self, index: tuple[Any, ...]) -> Hidden:
+                positions = cast(slice, index[1])
                 return Hidden(self.winners[positions])
 
         class Backbone:
-            def __init__(self, target):
+            def __init__(self, target: TargetModel) -> None:
                 self.target = target
                 self.embed_tokens = types.SimpleNamespace(as_linear=self.project)
 
-            def __call__(self, inputs, cache):
+            def __call__(self, inputs: tuple[list[int]], cache: list[Cache]) -> Hidden:
                 return Hidden(TargetModel.__call__(self.target, inputs, cache).winners)
 
             @staticmethod
-            def project(hidden):
+            def project(hidden: Hidden) -> Logits:
                 return Logits(hidden.winners)
 
         prompt, expected = "abcdef!|", "abcXef!"
@@ -436,7 +473,7 @@ class DecoderTests(unittest.TestCase):
     def test_first_token_callback_runs_after_verification_and_only_once(self):
         prompt, expected = "abcdefghij!|", "abcdefghij!"
         decoder, model = self.make_decoder({prompt: expected})
-        callback_observations = []
+        callback_observations: list[tuple[list[list[int]], list[int], list[int]]] = []
 
         def on_first_token():
             callback_observations.append((list(model.calls), list(decoder.cached_tokens),
@@ -453,7 +490,7 @@ class DecoderTests(unittest.TestCase):
         self.assertEqual(cached_tokens, list(map(ord, prompt + expected[:1])))
 
     def test_first_token_callback_skips_eos_zero_budget_and_prefill_cancellation(self):
-        cases = (
+        cases: tuple[tuple[str, str, str, dict[str, Any], str], ...] = (
             ("immediate eos", "prompt|", "", {}, "normal"),
             ("zero budget", "prompt|", "answer", {"max_tokens": 0}, "normal"),
             ("cancelled during prefill", "prompt|", "answer", {"cancelled": lambda: True},
@@ -462,7 +499,7 @@ class DecoderTests(unittest.TestCase):
         for name, prompt, expected, options, outcome in cases:
             with self.subTest(name=name):
                 decoder, _ = self.make_decoder({prompt: expected})
-                callbacks = []
+                callbacks: list[bool] = []
                 options = {**options, "on_first_token": lambda: callbacks.append(True)}
                 if outcome == "cancelled":
                     with self.assertRaises(decoder_module.GenerationCancelled):
@@ -483,7 +520,7 @@ class DecoderTests(unittest.TestCase):
                     # A partial marker, digits, or EOS must remain possible.
                     for count in range(len(text) + 1):
                         decoder, _ = self.make_decoder({prompt: text})
-                        callbacks = []
+                        callbacks: list[bool] = []
                         result = decoder.generate(
                             prompt, mode=mode, max_tokens=count,
                             on_no_edit_impossible=lambda: callbacks.append(True))
@@ -500,15 +537,18 @@ class DecoderTests(unittest.TestCase):
                 with self.subTest(text=text, mode=mode):
                     prompt = text + "|" if "|" not in text else "prompt|"
                     decoder, _ = self.make_decoder({prompt: text})
-                    events = []
-                    syncs = []
+                    events: list[tuple[str, int]] = []
+                    syncs: list[bool] = []
+
+                    def record_sync(*_values: object) -> None:
+                        syncs.append(True)
 
                     def impossible():
                         self.assertTrue(syncs)
                         self.assertEqual(decoder.cache[0].tokens, decoder.cached_tokens)
                         events.append(("impossible", len(decoder.cached_tokens) - len(prompt)))
 
-                    with patch.object(decoder_module.mx, "eval", side_effect=lambda *_: syncs.append(True)):
+                    with patch.object(decoder_module.mx, "eval", side_effect=record_sync):
                         result = decoder.generate(
                             prompt, mode=mode, max_tokens=len(text),
                             on_first_token=lambda: events.append(("first", 1)),
@@ -527,7 +567,7 @@ class DecoderTests(unittest.TestCase):
                         text = sentinel + stop + "ignored"
                         prompt = "prompt|"
                         decoder, _ = self.make_decoder({prompt: text})
-                        callbacks = []
+                        callbacks: list[bool] = []
                         result = decoder.generate(
                             prompt, mode=mode, max_tokens=len(sentinel) + prefix_length,
                             stop=["never-matched", stop],
@@ -542,8 +582,11 @@ class DecoderTests(unittest.TestCase):
         raw = marker + "XY" + marker
         decoder, _ = self.make_decoder({"prompt|": raw})
         decode = decoder.tokenizer.decode
-        decoder.tokenizer.decode = lambda ids: decode(ids).replace("XY", "\u00a0").replace("X", "\ufffd")
-        callbacks = []
+        def decode_transient(ids: list[int]) -> str:
+            return decode(ids).replace("XY", "\u00a0").replace("X", "\ufffd")
+
+        decoder.tokenizer.decode = decode_transient
+        callbacks: list[bool] = []
         result = decoder.generate("prompt|", mode="greedy", max_tokens=len(raw),
                                   on_no_edit_impossible=lambda: callbacks.append(True))
         self.assertEqual(result["text"], marker + "\u00a0" + marker)
@@ -553,9 +596,9 @@ class DecoderTests(unittest.TestCase):
         sentinel = "<|marker_1|><|marker_1|>"
         text, prompt = sentinel + "STOPignored", "prompt|"
         decoder, _ = self.make_decoder({prompt: text})
-        callbacks = []
+        callbacks: list[bool] = []
 
-        def propose(history, count):
+        def propose(history: list[int], count: int) -> list[int]:
             # Supply correct drafts independently of prompt lookup selection,
             # so the recognizer sees multiple verified tokens in one batch.
             emitted = len(history) - len(prompt)
@@ -580,7 +623,7 @@ class DecoderTests(unittest.TestCase):
             decoder.generate("prompt|", on_no_edit_impossible=impossible)
         self.assertIs(caught.exception, error)
         self.assertEqual(decoder.cached_tokens, [])
-        callbacks = []
+        callbacks: list[bool] = []
         with self.assertRaises(decoder_module.GenerationCancelled):
             decoder.generate("prompt|", cancelled=lambda: True,
                              on_no_edit_impossible=lambda: callbacks.append(True))
@@ -657,7 +700,7 @@ class DecoderTests(unittest.TestCase):
             with self.subTest(error_type=error_type):
                 decoder, _ = self.make_decoder({prompt: expected})
                 original_cache = decoder.cache[0]
-                callbacks = []
+                callbacks: list[bool] = []
 
                 def fail_after_commit():
                     callbacks.append(True)
@@ -687,11 +730,11 @@ class DecoderTests(unittest.TestCase):
                     decoder, _ = self.make_decoder({prompt: expected})
                     original_cache = decoder.cache[0]
 
-                    def failing_forward(chunk):
+                    def failing_forward(chunk: list[int]) -> None:
                         original_cache.tokens.append(ord("?"))
                         raise error_type("Forward failed after partial KV update")
 
-                    def failing_callback():
+                    def failing_callback() -> bool:
                         if original_cache.tokens:
                             raise error_type("Callback failed")
                         return False
@@ -752,7 +795,8 @@ class DecoderTests(unittest.TestCase):
             with self.subTest(error_type=error_type):
                 allocator = decoder_module.MLXAllocator(cache_limit_mb=0)
                 cleanup_error = OSError("final allocator clear failed")
-                original_error = error_type("generation failed") if error_type else None
+                error_class = cast(type[BaseException] | None, error_type)
+                original_error = error_class("generation failed") if error_class else None
                 with patch.object(decoder_module.mx, "get_cache_memory", return_value=1), \
                         patch.object(decoder_module.mx, "clear_cache", side_effect=cleanup_error):
                     if original_error is None:
@@ -761,7 +805,7 @@ class DecoderTests(unittest.TestCase):
                                 pass
                         self.assertIs(caught.exception, cleanup_error)
                     else:
-                        with self.assertRaises(error_type) as caught:
+                        with self.assertRaises(cast(type[BaseException], error_class)) as caught:
                             with allocator.session():
                                 raise original_error
                         self.assertIs(caught.exception, original_error)
@@ -800,11 +844,11 @@ class DecoderTests(unittest.TestCase):
         first_prefill = first._prefill
         second_prefill = second._prefill
 
-        def first_forward(chunk):
+        def first_forward(chunk: list[int]) -> Any:
             entered.wait()
             return first_prefill(chunk)
 
-        def second_forward(chunk):
+        def second_forward(chunk: list[int]) -> Any:
             entered.wait()
             return second_prefill(chunk)
 
@@ -826,14 +870,17 @@ class DecoderTests(unittest.TestCase):
         for options, expected_mb in (({}, 256), ({"cache_limit_mb": 0}, 0),
                                      ({"cache_limit_mb": 17}, 17)):
             with self.subTest(options=options):
-                events = []
+                events: list[tuple[str, object]] = []
 
-                def load_model(path):
+                def load_model(path: str) -> tuple[TargetModel, Tokenizer]:
                     events.append(("load", path))
                     return TargetModel({}), Tokenizer()
 
+                def record_limit(size: int) -> None:
+                    events.append(("limit", size))
+
                 with patch.object(decoder_module.mx, "set_cache_limit",
-                                  side_effect=lambda size: events.append(("limit", size))), \
+                                  side_effect=record_limit), \
                         patch.object(decoder_module, "load", side_effect=load_model):
                     decoder_module.Decoder("fake-model", **options)
                 self.assertEqual(events, [("limit", expected_mb * 1024**2),
@@ -868,7 +915,7 @@ class DecoderTests(unittest.TestCase):
                 with self.subTest(mode=mode, cache_bytes=cache_bytes):
                     decoder, _ = self.make_decoder({prompt: expected})
                     live_cache = decoder.cache[0]
-                    events = []
+                    events: list[str] = []
                     allocator = {"cache": cache_bytes}
 
                     def synchronize():
@@ -926,7 +973,7 @@ class DecoderTests(unittest.TestCase):
             with self.subTest(phase=phase):
                 decoder, _ = self.make_decoder({prompt: expected})
                 live_cache = decoder.cache[0]
-                events = []
+                events: list[str] = []
                 free_bytes = 2**30
 
                 def synchronize():
@@ -943,7 +990,7 @@ class DecoderTests(unittest.TestCase):
                 def cancel():
                     raise decoder_module.GenerationCancelled("cancelled by caller")
 
-                def fail_forward(chunk):
+                def fail_forward(chunk: list[int]) -> None:
                     live_cache.tokens.append(ord("?"))
                     raise RuntimeError("partial forward")
 
@@ -973,9 +1020,9 @@ class DecoderTests(unittest.TestCase):
         for error_type in (decoder_module.GenerationCancelled, RuntimeError):
             with self.subTest(error_type=error_type):
                 decoder, _ = self.make_decoder({"prompt|": "answer"})
-                allocator = {"active": 0, "cache": 0}
+                allocator: dict[str, int] = {"active": 0, "cache": 0}
                 original_error = error_type("failed request")
-                buffers = []
+                buffers: list[weakref.ReferenceType[Buffer]] = []
 
                 class Buffer:
                     def __init__(self):
@@ -985,7 +1032,7 @@ class DecoderTests(unittest.TestCase):
                         allocator["active"] -= 2**30
                         allocator["cache"] += 2**30
 
-                def fail_generation(*args):
+                def fail_generation(*_args: object) -> None:
                     temporary = Buffer()
                     buffers.append(weakref.ref(temporary))
                     raise original_error
@@ -1005,7 +1052,7 @@ class DecoderTests(unittest.TestCase):
                             decoder.generate("prompt|")
                         except error_type as caught:
                             self.assertIs(caught, original_error)
-                            traceback_names = []
+                            traceback_names: list[str] = []
                             trace = caught.__traceback__
                             while trace is not None:
                                 traceback_names.append(trace.tb_frame.f_code.co_name)
@@ -1029,13 +1076,13 @@ class DecoderTests(unittest.TestCase):
             for cyclic in (False, True):
                 with self.subTest(chain=chain, cyclic=cyclic):
                     decoder, _ = self.make_decoder({"prompt|": "answer"})
-                    allocator = {"active": 0, "cache": 0}
+                    allocator: dict[str, int] = {"active": 0, "cache": 0}
                     inner_error = ValueError("inner forward failed")
                     outer_error = RuntimeError("wrapped generation failure")
                     if cyclic:
                         inner_error.__cause__ = outer_error
-                    buffers = []
-                    released_before_reclaim = []
+                    buffers: list[weakref.ReferenceType[Buffer]] = []
+                    released_before_reclaim: list[bool] = []
 
                     class Buffer:
                         def __init__(self):
@@ -1050,7 +1097,7 @@ class DecoderTests(unittest.TestCase):
                         buffers.append(weakref.ref(temporary))
                         raise inner_error
 
-                    def fail_generation(*args):
+                    def fail_generation(*_args: object) -> None:
                         try:
                             allocate_and_fail()
                         except ValueError as caught:
@@ -1093,7 +1140,7 @@ class DecoderTests(unittest.TestCase):
                             gc.enable()
 
     def test_failed_request_does_not_retain_decoder_in_an_exception_cycle(self):
-        def fail_generation(*args):
+        def fail_generation(*_args: object) -> None:
             raise RuntimeError("forward failed")
 
         def run_failed_request():
@@ -1122,7 +1169,8 @@ class DecoderTests(unittest.TestCase):
             with self.subTest(error_type=error_type):
                 decoder, _ = self.make_decoder({"prompt|": "answer"})
                 cleanup_error = RuntimeError("allocator synchronization failed")
-                original_error = error_type("generation failed") if error_type else None
+                error_class = cast(type[BaseException] | None, error_type)
+                original_error = error_class("generation failed") if error_class else None
                 with patch.object(decoder_module.mx, "synchronize", side_effect=cleanup_error):
                     if original_error is None:
                         with self.assertRaises(RuntimeError) as caught:
@@ -1130,7 +1178,7 @@ class DecoderTests(unittest.TestCase):
                         self.assertIs(caught.exception, cleanup_error)
                     else:
                         with patch.object(decoder, "_generate", side_effect=original_error):
-                            with self.assertRaises(error_type) as caught:
+                            with self.assertRaises(cast(type[BaseException], error_class)) as caught:
                                 decoder.generate("prompt|")
                         self.assertIs(caught.exception, original_error)
                         self.assertTrue(any("Allocator cleanup failed" in note

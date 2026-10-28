@@ -241,11 +241,14 @@ can ship different engine versions; matching strict settings and interpreter
 makes the CLI reproducible but does not promise identical diagnostics across
 Pylance releases.
 
-The strict scope is all handwritten server modules under `src`; the unittest
-suite is verified separately. Generated protobuf Python implementations are
+The strict scope includes all handwritten server modules under `src` and the
+unittest suite under `tests`. Generated protobuf Python implementations are
 excluded from strict analysis, and protoc emits their message `.pyi` declarations
 when `pnpm run generate:grpc` runs. The small service `.pyi` contract follows the
 RPC schema. Local MLX-LM stubs describe only the untyped external surfaces used
 by this server; keep those contracts aligned with the locked runtime versions.
+The three generated protobuf files are also listed under `ignore` so Pylance
+suppresses their diagnostics when opened or imported; `exclude` alone only
+controls file discovery. Their declarations remain available to typed callers.
 The environment targets Python 3.13 on Apple Silicon macOS, matching the MLX
 runtime.

@@ -12,7 +12,7 @@ SOCKET_PATH = "/tmp/nesweep-test/server.sock"
 
 
 class LauncherTests(unittest.TestCase):
-    def run_launcher(self, *, overrides=None, runtime_override=False, arguments=None):
+    def run_launcher(self, *, overrides: dict[str, str] | None = None, runtime_override: bool = False, arguments: list[str] | None = None) -> list[str]:
         with tempfile.TemporaryDirectory(prefix="zeta launcher ") as directory:
             temporary = Path(directory)
             capture = temporary / "arguments"

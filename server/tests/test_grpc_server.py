@@ -5,13 +5,16 @@ import tempfile
 import threading
 import time
 import unittest
+from collections.abc import Mapping
+from typing import Any, cast
 from unittest.mock import patch
 
 import grpc
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
-from opentelemetry.trace import StatusCode
+from opentelemetry.trace import SpanContext, StatusCode
+from opentelemetry.util.types import AnyValue
 
 from test_server import load_server
 
@@ -21,8 +24,9 @@ completion_pb2 = server_module.completion_pb2
 completion_pb2_grpc = server_module.completion_pb2_grpc
 
 
-def result(text, *, prompt_tokens=None, completion_tokens=None):
-    usage = {}
+def result(text: str, *, prompt_tokens: int | None = None,
+           completion_tokens: int | None = None) -> dict[str, object]:
+    usage: dict[str, int] = {}
     if prompt_tokens is not None:
         usage["prompt_tokens"] = prompt_tokens
     if completion_tokens is not None:
@@ -31,12 +35,12 @@ def result(text, *, prompt_tokens=None, completion_tokens=None):
 
 
 class _SpanCountExporter(InMemorySpanExporter):
-    def __init__(self, expected_count):
+    def __init__(self, expected_count: int) -> None:
         super().__init__()
         self.expected_count = expected_count
         self.finished = threading.Event()
 
-    def export(self, spans):
+    def export(self, spans: Any) -> Any:
         result = super().export(spans)
         if len(self.get_finished_spans()) >= self.expected_count:
             self.finished.set()
@@ -44,7 +48,7 @@ class _SpanCountExporter(InMemorySpanExporter):
 
 
 class GrpcServerTests(unittest.TestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self.directory = tempfile.TemporaryDirectory(prefix="nes-grpc-", dir="/tmp")
         self.addCleanup(self.directory.cleanup)
         self.socket_path = self.directory.name + "/completion.sock"
@@ -59,7 +63,9 @@ class GrpcServerTests(unittest.TestCase):
         grpc.channel_ready_future(self.channel).result(timeout=3)
         self.stub = completion_pb2_grpc.CompletionServiceStub(self.channel)
 
-    def capture_spans(self, expected_count=None):
+    def capture_spans(
+        self, expected_count: int | None = None
+    ) -> _SpanCountExporter | InMemorySpanExporter:
         observability = server_module.observability
         observability.shutdown_tracing()
         exporter = (_SpanCountExporter(expected_count) if expected_count is not None
@@ -74,14 +80,17 @@ class GrpcServerTests(unittest.TestCase):
     def test_real_wire_metadata_rejects_invalid_and_absent_context_without_leakage(self):
         exporter = self.capture_spans()
 
-        def complete(metadata=None):
+        def complete(metadata: tuple[tuple[str, str], ...] | None = None) -> list[Any]:
             request = completion_pb2.CompletionRequest(
                 model="zeta-2.1", prompt="private prompt", temperature=0)
             if metadata is None:
                 return list(self.stub.Complete(request))
             return list(self.stub.Complete(request, metadata=metadata))
 
-        self.decoder.generate = lambda *args, **kwargs: result("private completion")
+        def return_private_completion(*args: Any, **kwargs: Any) -> dict[str, object]:
+            return result("private completion")
+
+        self.decoder.generate = return_private_completion
         complete((
             ("traceparent", "00-00000000000000000000000000003333-000000000000cccc-01"),
             ("tracestate", "vendor=value"),
@@ -92,16 +101,22 @@ class GrpcServerTests(unittest.TestCase):
         roots = [span for span in exporter.get_finished_spans()
                  if span.name == "nesweep.CompletionService/Complete"]
         self.assertEqual(len(roots), 3)
-        valid = next(span for span in roots if span.context.trace_id == 0x3333)
-        self.assertEqual(valid.parent.span_id, 0xCCCC)
+        valid = next(
+            span for span in roots
+            if cast(SpanContext, span.context).trace_id == 0x3333
+        )
+        self.assertEqual(cast(SpanContext, valid.parent).span_id, 0xCCCC)
         invalid_and_absent = [span for span in roots if span is not valid]
         self.assertTrue(all(span.parent is None for span in invalid_and_absent))
-        self.assertEqual(len({span.context.trace_id for span in roots}), 3)
+        self.assertEqual(
+            len({cast(SpanContext, span.context).trace_id for span in roots}),
+            3,
+        )
 
     def test_zeta_completion_streams_each_opted_in_milestone_once_before_result(self):
         self.decoder.result = result("complete edit", prompt_tokens=12, completion_tokens=3)
 
-        def generate(prompt, **options):
+        def generate(prompt: str, **options: Any) -> dict[str, object]:
             self.decoder.calls.append((prompt, {
                 key: value for key, value in options.items()
                 if key not in ("cancelled", "on_first_token", "on_no_edit_impossible")
@@ -167,7 +182,7 @@ class GrpcServerTests(unittest.TestCase):
         entered = threading.Event()
         observed_cancel = threading.Event()
 
-        def generate(prompt, **options):
+        def generate(prompt: str, **options: Any) -> dict[str, object]:
             options["on_first_token"]()
             entered.set()
             deadline = time.monotonic() + 3
@@ -191,12 +206,16 @@ class GrpcServerTests(unittest.TestCase):
         self.assertEqual(caught.exception.code(), grpc.StatusCode.DEADLINE_EXCEEDED)
         self.assertTrue(observed_cancel.wait(timeout=1))
 
-        self.assertTrue(exporter.finished.wait(timeout=2))
+        self.assertTrue(cast(_SpanCountExporter, exporter).finished.wait(timeout=2))
         self.service.shutdown()
 
         spans = exporter.get_finished_spans()
         self.assertCountEqual(
-            [(span.name, span.attributes.get("nesweep.outcome")) for span in spans],
+            [
+                (span.name, cast(Mapping[str, AnyValue], span.attributes).get(
+                    "nesweep.outcome"))
+                for span in spans
+            ],
             [("nesweep.CompletionService/Complete", "cancelled"),
              ("completion.generate", "cancelled")])
         for span in spans:
@@ -209,8 +228,8 @@ class GrpcServerTests(unittest.TestCase):
             "zeta-2.1", "qwen2.5-coder-7b-instruct"])
         barrier = threading.Barrier(2, timeout=2)
 
-        def generate(text):
-            def run(prompt, **options):
+        def generate(text: str) -> Any:
+            def run(prompt: str, **options: Any) -> dict[str, object]:
                 barrier.wait()
                 return result(text)
             return run
@@ -224,7 +243,7 @@ class GrpcServerTests(unittest.TestCase):
                 prompt="<|fim_prefix|>x<|fim_suffix|>y<|fim_middle|>"),
         )
 
-        def complete(request):
+        def complete(request: Any) -> str:
             return list(self.stub.Complete(request))[-1].final_result.text
 
         with ThreadPoolExecutor(max_workers=2) as workers:
@@ -270,7 +289,7 @@ class GrpcServerTests(unittest.TestCase):
         entered = threading.Event()
         cancelled = threading.Event()
 
-        def wait_for_cancel(prompt, **options):
+        def wait_for_cancel(prompt: str, **options: Any) -> dict[str, object]:
             entered.set()
             deadline = time.monotonic() + 3
             while time.monotonic() < deadline:
@@ -294,20 +313,25 @@ class GrpcServerTests(unittest.TestCase):
 
     def test_inference_failures_are_sanitized_as_internal(self):
         exporter = self.capture_spans()
-        self.decoder.generate = lambda *args, **kwargs: (_ for _ in ()).throw(
-            RuntimeError("private model path"))
+        def raise_private_model_error(*args: Any, **kwargs: Any) -> dict[str, object]:
+            raise RuntimeError("private model path")
+
+        self.decoder.generate = raise_private_model_error
         logger = server_module.logging.getLogger(server_module.__name__)
         with patch.object(logger, "error") as log_error, \
                 self.assertRaises(grpc.RpcError) as caught:
             list(self.stub.Complete(completion_pb2.CompletionRequest(
                 model="zeta-2.1", prompt="source", temperature=0)))
         self.assertEqual(caught.exception.code(), grpc.StatusCode.INTERNAL)
-        self.assertNotIn("private model path", caught.exception.details())
+        self.assertNotIn("private model path", cast(str, caught.exception.details()))
         log_error.assert_called_once()
 
         spans = exporter.get_finished_spans()
         generation = next(span for span in spans if span.name == "completion.generate")
-        self.assertEqual(generation.attributes["error.type"], "RuntimeError")
+        self.assertEqual(
+            cast(Mapping[str, AnyValue], generation.attributes)["error.type"],
+            "RuntimeError",
+        )
         self.assertEqual(generation.status.status_code, StatusCode.ERROR)
         self.assertTrue(any(span.name == "nesweep.CompletionService/Complete"
                             for span in spans))
@@ -317,12 +341,12 @@ class GrpcServerTests(unittest.TestCase):
 
 
 class _FakeDecoder:
-    def __init__(self):
-        self.calls = []
+    def __init__(self) -> None:
+        self.calls: list[tuple[str, dict[str, object]]] = []
         self.result = result("local output")
 
-    def generate(self, prompt, **options):
-        callbacks = {
+    def generate(self, prompt: str, **options: Any) -> dict[str, object]:
+        callbacks: dict[str, Any] = {
             key: options.pop(key)
             for key in ("cancelled", "on_first_token", "on_no_edit_impossible")
             if key in options

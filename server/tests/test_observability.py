@@ -5,6 +5,8 @@ import io
 import os
 from pathlib import Path
 import sys
+from collections.abc import Callable, Mapping
+from typing import Protocol, cast
 import unittest
 from unittest.mock import Mock, patch
 
@@ -13,6 +15,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.trace import StatusCode
+from opentelemetry.util.types import AttributeValue
 
 
 SOURCE = Path(__file__).resolve().parents[1] / "src"
@@ -22,11 +25,40 @@ if str(SOURCE) not in sys.path:
 import observability
 
 
-def load_isolated_observability(name):
+class _TestResource(Protocol):
+    attributes: Mapping[str, object]
+
+
+class _ProviderWithResource(Protocol):
+    resource: _TestResource
+
+    def force_flush(self, timeout_millis: int = 30000) -> bool: ...
+    def shutdown(self) -> None: ...
+
+
+class _ObservabilityModule(Protocol):
+    ConsoleSpanExporter: Callable[..., object]
+
+    def configure_tracing(self, provider: object | None = None) -> None: ...
+    def start_span(self, name: str) -> trace.Span: ...
+    def shutdown_tracing(self) -> None: ...
+
+
+def _provider(module: _ObservabilityModule) -> _ProviderWithResource | None:
+    return cast(_ProviderWithResource | None, getattr(module, "_provider"))
+
+
+def _set_provider(module: _ObservabilityModule, provider: object) -> None:
+    setattr(module, "_provider", cast(_ProviderWithResource, provider))
+
+
+def load_isolated_observability(name: str) -> _ObservabilityModule:
     spec = importlib.util.spec_from_file_location(name, SOURCE / "observability.py")
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load observability module: {name}")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    return module
+    return cast(_ObservabilityModule, module)
 
 
 class ObservabilityTests(unittest.TestCase):
@@ -58,11 +90,13 @@ class ObservabilityTests(unittest.TestCase):
         spans = self.exporter.get_finished_spans()
         self.assertEqual({span.name for span in spans}, {
             "decoder.prefill", "decoder.decode", "completion.generate"})
-        self.assertEqual({span.attributes["nesweep.outcome"] for span in spans}, {
+        self.assertEqual({cast(str, cast(Mapping[str, AttributeValue], span.attributes)[
+            "nesweep.outcome"]) for span in spans}, {
             "success", "error", "cancelled"})
         error = next(span for span in spans if span.name == "decoder.decode")
         self.assertEqual(error.status.status_code, StatusCode.ERROR)
-        self.assertEqual(error.attributes["error.type"], "RuntimeError")
+        self.assertEqual(cast(str, cast(Mapping[str, AttributeValue], error.attributes)[
+            "error.type"]), "RuntimeError")
         self.assertFalse(error.events)
         cancelled = next(span for span in spans if span.name == "completion.generate")
         self.assertEqual(cancelled.status.status_code, StatusCode.UNSET)
@@ -115,9 +149,12 @@ class ObservabilityTests(unittest.TestCase):
             self.assertEqual(trace.get_tracer_provider(), process_provider)
             self.assertEqual(output.getvalue(), "")
             try:
-                self.assertEqual(module._provider.resource.attributes.get("service.namespace"),
+                provider = _provider(module)
+                assert provider is not None
+                resource = provider.resource
+                self.assertEqual(resource.attributes.get("service.namespace"),
                                  "nesweep")
-                self.assertEqual(module._provider.resource.attributes.get("service.name"),
+                self.assertEqual(resource.attributes.get("service.name"),
                                  "model-server")
             finally:
                 module.shutdown_tracing()
@@ -141,7 +178,7 @@ class ObservabilityTests(unittest.TestCase):
         with patch.dict(os.environ, {"OTEL_TRACES_EXPORTER": "otlp"}, clear=True), \
                 self.assertLogs("observability_missing_otlp_test", level="WARNING"):
             missing.configure_tracing()
-            self.assertIsNone(missing._provider)
+            self.assertIsNone(_provider(missing))
 
         explicit = load_isolated_observability("observability_explicit_otlp_test")
         with patch.dict(os.environ, {
@@ -151,34 +188,34 @@ class ObservabilityTests(unittest.TestCase):
         }, clear=True):
             explicit.configure_tracing()
             try:
-                self.assertIsNotNone(explicit._provider)
+                self.assertIsNotNone(_provider(explicit))
             finally:
                 explicit.shutdown_tracing()
 
     def test_shutdown_flush_is_bounded_before_provider_shutdown(self):
         module = load_isolated_observability("observability_shutdown_test")
         provider = Mock()
-        module._provider = provider
+        _set_provider(module, provider)
 
         module.shutdown_tracing()
 
         provider.force_flush.assert_called_once_with(timeout_millis=5000)
         provider.shutdown.assert_called_once_with()
-        self.assertIsNone(module._provider)
+        self.assertIsNone(_provider(module))
 
     def test_shutdown_is_fail_soft_and_attempts_provider_shutdown_after_flush_failure(self):
         module = load_isolated_observability("observability_shutdown_failure_test")
         provider = Mock()
         provider.force_flush.side_effect = RuntimeError("private flush failure")
         provider.shutdown.side_effect = RuntimeError("private shutdown failure")
-        module._provider = provider
+        _set_provider(module, provider)
 
         with self.assertLogs("observability_shutdown_failure_test", level="WARNING") as captured:
             module.shutdown_tracing()
 
         provider.force_flush.assert_called_once_with(timeout_millis=5000)
         provider.shutdown.assert_called_once_with()
-        self.assertIsNone(module._provider)
+        self.assertIsNone(_provider(module))
         self.assertTrue(any("flush failed" in record.getMessage() for record in captured.records))
         self.assertTrue(any("shutdown failed" in record.getMessage() for record in captured.records))
         self.assertNotIn("private", " ".join(record.getMessage() for record in captured.records))

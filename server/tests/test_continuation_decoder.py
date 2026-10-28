@@ -1,11 +1,14 @@
 """CPU-only contract tests for raw Qwen FIM continuation decoding."""
 
+from __future__ import annotations
+
 import importlib.util
 from pathlib import Path
 import sys
 import types
 import unittest
 import weakref
+from typing import Any, SupportsIndex, cast, overload
 from unittest.mock import patch
 
 from opentelemetry.sdk.trace import TracerProvider
@@ -14,10 +17,10 @@ from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanE
 
 
 class Scalar(int):
-    def item(self):
+    def item(self) -> int:
         return int(self)
 
-    def reshape(self, *shape):
+    def reshape(self, *shape: int) -> "Array":
         if shape == (1, 1):
             return Array([Array([self])])
         if shape in ((1,), (-1,)):
@@ -25,36 +28,42 @@ class Scalar(int):
         raise AssertionError(f"Unexpected scalar shape: {shape!r}")
 
 
-class Array(list):
+class Array(list[Any]):
     """Only the array operations exercised by the CPU contract harness."""
 
-    def __getitem__(self, key):
+    @overload
+    def __getitem__(self, key: SupportsIndex) -> Any: ...
+
+    @overload
+    def __getitem__(self, key: slice) -> Array: ...
+
+    def __getitem__(self, key: SupportsIndex | slice) -> Any:
         value = super().__getitem__(key)
         return Array(value) if isinstance(key, slice) else value
 
 
 class Cache:
-    def __init__(self):
-        self.tokens = []
+    def __init__(self) -> None:
+        self.tokens: list[int] = []
 
     @property
     def nbytes(self):
         return len(self.tokens) * 8
 
-    def is_trimmable(self):
+    def is_trimmable(self) -> bool:
         return True
 
 
 class Scores:
-    def __init__(self, token):
+    def __init__(self, token: int | dict[int, float]) -> None:
         self.token = token
 
 
 class Logits:
-    def __init__(self, token):
+    def __init__(self, token: int | dict[int, float]) -> None:
         self.token = token
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: tuple[slice, int, slice]) -> Scores:
         if index == (slice(None), -1, slice(None)):
             return Scores(self.token)
         raise AssertionError(f"Unexpected logits index: {index!r}")
@@ -64,14 +73,14 @@ class Tokenizer:
     eos_token_ids = [0]
     eos_token_id = 0
 
-    def __init__(self):
-        self.encodes = []
+    def __init__(self) -> None:
+        self.encodes: list[tuple[str, bool]] = []
 
-    def encode(self, text, add_special_tokens=True):
+    def encode(self, text: str, add_special_tokens: bool = True) -> list[int]:
         self.encodes.append((text, add_special_tokens))
         return list(map(ord, text))
 
-    def decode(self, tokens):
+    def decode(self, tokens: list[int] | Array) -> str:
         return "".join(map(chr, tokens))
 
 
@@ -80,14 +89,15 @@ class CausalOracle:
 
     model_type = "fake"
 
-    def __init__(self, tokenizer, responses, context_length=256):
+    def __init__(self, tokenizer: Tokenizer, responses: dict[str, str],
+                 context_length: int = 256) -> None:
         self.tokenizer = tokenizer
         self.responses = {tuple(map(ord, prompt)): text for prompt, text in responses.items()}
         self.args = types.SimpleNamespace(max_position_embeddings=context_length)
-        self.calls = []
+        self.calls: list[list[int]] = []
         self.fail_next = False
 
-    def __call__(self, inputs, cache):
+    def __call__(self, inputs: Array, cache: list[Cache]) -> Logits:
         (tokens,) = inputs
         tokens = list(tokens)
         for token in tokens:
@@ -113,23 +123,23 @@ class CausalOracle:
 
 
 class Runtime:
-    def __init__(self, responses, context_length=256):
+    def __init__(self, responses: dict[str, str], context_length: int = 256) -> None:
         self.tokenizer = Tokenizer()
-        self.model = CausalOracle(self.tokenizer, responses, context_length)
-        self.caches = []
-        self.sampler_temperatures = []
-        self.processor_options = []
-        self.processor_histories = []
-        self.processed_scores = []
-        self.streams = []
-        self.trims = []
+        self.model: Any = CausalOracle(self.tokenizer, responses, context_length)
+        self.caches: list[weakref.ReferenceType[Cache]] = []
+        self.sampler_temperatures: list[float] = []
+        self.processor_options: list[dict[str, Any]] = []
+        self.processor_histories: list[list[int]] = []
+        self.processed_scores: list[dict[int, float]] = []
+        self.streams: list[Any] = []
+        self.trims: list[int] = []
 
-        def make_cache(model):
+        def make_cache(model: Any) -> list[Cache]:
             cache = [Cache()]
             self.caches.append(weakref.ref(cache[0]))
             return cache
 
-        def trim_cache(caches, count):
+        def trim_cache(caches: list[Cache], count: int) -> None:
             self.trims.append(count)
             for cache in caches:
                 if count < 0 or count > len(cache.tokens):
@@ -137,18 +147,19 @@ class Runtime:
                 if count:
                     del cache.tokens[-count:]
 
-        def make_sampler(temperature):
+        def make_sampler(temperature: float) -> Any:
             self.sampler_temperatures.append(temperature)
-            def sample(scores):
+            def sample(scores: Scores) -> Scalar:
                 if isinstance(scores.token, dict):
-                    return Scalar(max(scores.token, key=scores.token.get))
+                    values = scores.token
+                    return Scalar(max(values, key=lambda candidate: values[candidate]))
                 return Scalar(scores.token)
             return sample
 
-        def make_processors(**options):
+        def make_processors(**options: Any) -> list[Any]:
             self.processor_options.append(options)
 
-            def track_history(history, scores):
+            def track_history(history: list[int], scores: Scores) -> Scores:
                 self.processor_histories.append(list(history))
                 if isinstance(scores.token, dict):
                     values = dict(scores.token)
@@ -164,39 +175,61 @@ class Runtime:
 
             return [track_history]
 
-        def stream(stream):
+        def stream(stream: Any) -> "_NullContext":
             self.streams.append(stream)
             return _NullContext()
 
-        core = types.ModuleType("mlx.core")
+        core: Any = types.ModuleType("mlx.core")
         core.array = Array
-        core.reshape = lambda value, shape: value.reshape(*shape)
-        core.concatenate = lambda values: Array(
-            token for value in values
-            for token in (value if isinstance(value, list) else [value]))
-        core.eval = lambda *values: None
-        core.async_eval = lambda *values: None
-        core.set_cache_limit = lambda value: None
-        core.synchronize = lambda *streams: None
+        def reshape(value: Scalar, shape: tuple[int, ...]) -> Array:
+            return value.reshape(*shape)
+
+        def concatenate(values: list[Any]) -> Array:
+            tokens: list[Any] = []
+            for value in values:
+                tokens.extend(cast(list[Any], value) if isinstance(value, list) else [value])
+            return Array(tokens)
+
+        def noop(*values: Any) -> None:
+            return None
+
+        def set_cache_limit(value: int) -> None:
+            return None
+
+        def synchronize(*streams: Any) -> None:
+            return None
+
+        def new_thread_local_stream(device: Any) -> object:
+            return object()
+
+        core.reshape = reshape
+        core.concatenate = concatenate
+        core.eval = noop
+        core.async_eval = noop
+        core.set_cache_limit = set_cache_limit
+        core.synchronize = synchronize
         core.get_cache_memory = lambda: 0
         core.get_active_memory = lambda: 0
         core.get_peak_memory = lambda: 0
         core.clear_cache = lambda: None
         core.gpu = object()
-        core.new_thread_local_stream = lambda device: object()
+        core.new_thread_local_stream = new_thread_local_stream
         core.stream = stream
 
-        mlx = types.ModuleType("mlx")
+        mlx: Any = types.ModuleType("mlx")
         mlx.core = core
-        lm = types.ModuleType("mlx_lm")
-        lm.load = lambda path: (self.model, self.tokenizer)
-        cache_module = types.ModuleType("mlx_lm.models.cache")
+        lm: Any = types.ModuleType("mlx_lm")
+        def load(path: str) -> tuple[Any, Tokenizer]:
+            return self.model, self.tokenizer
+
+        lm.load = load
+        cache_module: Any = types.ModuleType("mlx_lm.models.cache")
         cache_module.make_prompt_cache = make_cache
         cache_module.trim_prompt_cache = trim_cache
-        sample_utils = types.ModuleType("mlx_lm.sample_utils")
+        sample_utils: Any = types.ModuleType("mlx_lm.sample_utils")
         sample_utils.make_sampler = make_sampler
         sample_utils.make_logits_processors = make_processors
-        self.modules = {
+        self.modules: dict[str, Any] = {
             "mlx": mlx,
             "mlx.core": core,
             "mlx_lm": lm,
@@ -207,34 +240,34 @@ class Runtime:
 
 
 class _NullContext:
-    def __enter__(self):
+    def __enter__(self) -> "_NullContext":
         return self
 
-    def __exit__(self, *_):
+    def __exit__(self, *_: object) -> bool:
         return False
 
 
 class QueuedRuntime(Runtime):
     """Model async submission separately from completion, without a GPU."""
 
-    def __init__(self, responses):
+    def __init__(self, responses: dict[str, str]) -> None:
         super().__init__(responses)
-        self.pending = []
+        self.pending: list[Any] = []
         self.submissions = 0
         self.max_pending = 0
-        self.decode_pending = []
-        self.forward_before_item = []
-        self.fail_submission = None
+        self.decode_pending: list[int] = []
+        self.forward_before_item: list[bool] = []
+        self.fail_submission: int | None = None
         self.evaluation_error = RuntimeError("queued evaluation failed")
         runtime = self
 
         class QueuedScalar(Scalar):
-            def on_forward(self):
+            def on_forward(self) -> None:
                 if getattr(self, "evaluated", False) or getattr(self, "materialized", False):
                     raise AssertionError("next graph constructed after current token evaluation")
                 self.forward_submission = runtime.submissions
 
-            def item(self):
+            def item(self) -> int:
                 if hasattr(self, "forward_submission"):
                     runtime.forward_before_item.append(
                         runtime.submissions > self.forward_submission)
@@ -245,28 +278,32 @@ class QueuedRuntime(Runtime):
         sample_utils = self.modules["mlx_lm.sample_utils"]
         make_sampler = sample_utils.make_sampler
 
-        def queued_sampler(temperature):
+        def queued_sampler(temperature: float) -> Any:
             sample = make_sampler(temperature)
-            return lambda scores: QueuedScalar(sample(scores))
 
-        def submit(*values):
+            def sample_queued(scores: Scores) -> QueuedScalar:
+                return QueuedScalar(sample(scores))
+
+            return sample_queued
+
+        def submit(*values: Any) -> None:
             for value in values:
                 self.submissions += 1
                 value.submission = self.submissions
                 self.pending.append(value)
                 self.max_pending = max(self.max_pending, len(self.pending))
 
-        def evaluate(*values):
+        def evaluate(*values: Any) -> None:
             for value in values:
                 self.complete(value)
 
-        def synchronize(*_):
+        def synchronize(*_: Any) -> None:
             for value in list(self.pending):
                 self.complete(value)
 
         decode = self.tokenizer.decode
 
-        def observe_decode(tokens):
+        def observe_decode(tokens: list[int] | Array) -> str:
             self.decode_pending.append(len(self.pending))
             return decode(tokens)
 
@@ -275,12 +312,12 @@ class QueuedRuntime(Runtime):
         trim_cache = cache_module.trim_prompt_cache
         make_cache = cache_module.make_prompt_cache
 
-        def checked_trim(caches, count):
+        def checked_trim(caches: list[Cache], count: int) -> None:
             if self.pending:
                 raise AssertionError("KV cache trimmed before queued work completed")
             return trim_cache(caches, count)
 
-        def checked_make_cache(model):
+        def checked_make_cache(model: Any) -> list[Cache]:
             if self.pending:
                 raise AssertionError("KV cache replaced before queued work completed")
             return make_cache(model)
@@ -293,7 +330,7 @@ class QueuedRuntime(Runtime):
         core.synchronize = synchronize
         self.tokenizer.decode = observe_decode
 
-    def complete(self, value):
+    def complete(self, value: Any) -> None:
         for index, pending in enumerate(self.pending):
             if pending is value:
                 del self.pending[index]
@@ -303,13 +340,17 @@ class QueuedRuntime(Runtime):
                 break
 
 
-def load_continuation_decoder(runtime):
+def load_continuation_decoder(runtime: Runtime) -> Any:
     server_dir = Path(__file__).resolve().parents[1] / "src"
     decoder_path = server_dir / "decoder.py"
     continuation_path = server_dir / "continuation_decoder.py"
     decoder_spec = importlib.util.spec_from_file_location("decoder", decoder_path)
     continuation_spec = importlib.util.spec_from_file_location(
         "continuation_decoder_contract", continuation_path)
+    if decoder_spec is None or decoder_spec.loader is None:
+        raise ImportError("Could not load decoder module")
+    if continuation_spec is None or continuation_spec.loader is None:
+        raise ImportError("Could not load continuation decoder module")
     decoder = importlib.util.module_from_spec(decoder_spec)
     continuation = importlib.util.module_from_spec(continuation_spec)
     with patch.object(sys, "path", [str(server_dir), *sys.path]), \
@@ -319,22 +360,22 @@ def load_continuation_decoder(runtime):
     return continuation
 
 
-def make_decoder(runtime, context_length=None):
+def make_decoder(runtime: Runtime, context_length: int | None = None) -> tuple[Any, Any]:
     module = load_continuation_decoder(runtime)
     decoder = module.ContinuationDecoder("fake-model", context_length=context_length)
     return module, decoder
 
 
 class ContinuationDecoderTests(unittest.TestCase):
-    def assert_cache_coherent(self, decoder):
+    def assert_cache_coherent(self, decoder: Any) -> None:
         self.assertEqual(decoder.cache[0].tokens, decoder.cached_tokens)
 
     def test_async_work_overlaps_cpu_decode_and_drains_before_cleanup_and_unlock(self):
         prompt = "<|fim_prefix|>x<|fim_suffix|>y<|fim_middle|>"
         runtime = QueuedRuntime({prompt: "abcd"})
         _, decoder = make_decoder(runtime)
-        observations = []
-        uncommitted = []
+        observations: list[str] = []
+        uncommitted: list[int] = []
         reclaim = decoder.allocator.reclaim
         prefill_token = decoder._prefill_token
         lock = decoder.lock
@@ -344,7 +385,7 @@ class ContinuationDecoderTests(unittest.TestCase):
             def __enter__(self):
                 return lock.__enter__()
 
-            def __exit__(self, *args):
+            def __exit__(self, *args: object) -> bool:
                 test.assertEqual(runtime.pending, [])
                 test.assert_cache_coherent(decoder)
                 observations.append("unlock")
@@ -356,7 +397,7 @@ class ContinuationDecoderTests(unittest.TestCase):
             observations.append("reclaim")
             reclaim()
 
-        def checked_forward(sampled):
+        def checked_forward(sampled: int) -> Any:
             logits = prefill_token(sampled)
             uncommitted.append(len(decoder.cache[0].tokens) - len(decoder.cached_tokens))
             self.assertLessEqual(uncommitted[-1], 2)
@@ -418,7 +459,7 @@ class ContinuationDecoderTests(unittest.TestCase):
                 runtime = QueuedRuntime({prompt: "abcd"})
                 module, decoder = make_decoder(runtime)
                 callback_error = RuntimeError("first token callback failed")
-                callback_pending = []
+                callback_pending: list[int] = []
                 reclaim = decoder.allocator.reclaim
 
                 def callback():
@@ -472,7 +513,7 @@ class ContinuationDecoderTests(unittest.TestCase):
                 self.assert_cache_coherent(decoder)
 
     def test_reuses_only_exact_prefix_and_matches_fresh_outputs_after_edits(self):
-        def fim(prefix, suffix):
+        def fim(prefix: str, suffix: str) -> str:
             return f"<|fim_prefix|>{prefix}<|fim_suffix|>{suffix}<|fim_middle|>"
 
         prompts = [
@@ -603,7 +644,8 @@ class ContinuationDecoderTests(unittest.TestCase):
             spans = exporter.get_finished_spans()
             self.assertEqual({span.name for span in spans}, {
                 "decoder.prefill", "decoder.decode"})
-            self.assertTrue(all(span.attributes["nesweep.outcome"] == "success"
+            self.assertTrue(all(span.attributes is not None
+                                and span.attributes["nesweep.outcome"] == "success"
                                 for span in spans))
         finally:
             observability.shutdown_tracing()
@@ -645,13 +687,15 @@ class ContinuationDecoderTests(unittest.TestCase):
                 class FixedLogitsModel:
                     args = types.SimpleNamespace(max_position_embeddings=2048)
 
-                    def __call__(self, inputs, cache):
+                    def __call__(self, inputs: Array, cache: list[Cache]) -> Logits:
                         cache[0].tokens.extend(inputs[0])
                         return Logits(dict(raw_scores))
 
                 runtime.model = FixedLogitsModel()
                 _, decoder = make_decoder(runtime)
-                expected_tokens, expected_scores, expected_histories = [], [], []
+                expected_tokens: list[int] = []
+                expected_scores: list[dict[int, float]] = []
+                expected_histories: list[list[int]] = []
                 # Reference behavior deliberately keeps the full original
                 # history, as the unoptimized caller of mlx-lm did.
                 for _ in range(24):
@@ -663,7 +707,7 @@ class ContinuationDecoderTests(unittest.TestCase):
                             values[token] = value / 1.1 if value >= 0 else value * 1.1
                     expected_histories.append(history[-20:])
                     expected_scores.append(values)
-                    expected_tokens.append(max(values, key=values.get))
+                    expected_tokens.append(max(values, key=lambda token: values[token]))
 
                 result = decoder.generate(prompt, max_tokens=24)
 
@@ -808,9 +852,9 @@ class ContinuationDecoderTests(unittest.TestCase):
                 prefill_token = decoder._prefill_token
                 forwards = 0
                 checks = 0
-                observed = []
+                observed: list[str] = []
 
-                def forward(chunk, evaluate=prefill):
+                def forward(chunk: int, evaluate: Any = prefill) -> Any:
                     nonlocal forwards
                     forwards += 1
                     logits = evaluate(chunk)
@@ -837,7 +881,7 @@ class ContinuationDecoderTests(unittest.TestCase):
                     else:
                         self.assertEqual(decoder.cached_tokens[:len(prompt)], list(map(ord, prompt)))
 
-                def synchronize(*streams):
+                def synchronize(*streams: Any) -> None:
                     if streams:
                         self.assertEqual(streams, (decoder.stream,))
                         observed.append("drain")
@@ -852,16 +896,19 @@ class ContinuationDecoderTests(unittest.TestCase):
 
                 core = runtime.modules["mlx.core"]
                 allocator_memory = {"cache": decoder.cache_limit_bytes + 1}
-                options = dict(max_tokens=12, cancelled=cancelled)
+                options: dict[str, Any] = dict(max_tokens=12, cancelled=cancelled)
                 if outcome == "length":
                     options["max_tokens"] = 2
                 elif outcome == "zero":
                     options["max_tokens"] = 0
                 elif outcome == "stop":
                     options["stop"] = "END"
+                def forward_token(token: int) -> Any:
+                    return forward(token, prefill_token)
+
                 with patch.object(decoder, "_prefill", side_effect=forward), \
                         patch.object(decoder, "_prefill_token",
-                                     side_effect=lambda token: forward(token, prefill_token)), \
+                                     side_effect=forward_token), \
                         patch.object(core, "synchronize", side_effect=synchronize), \
                         patch.object(core, "clear_cache", side_effect=clear_cache), \
                         patch.object(core, "get_cache_memory",
@@ -901,7 +948,7 @@ class ContinuationDecoderTests(unittest.TestCase):
                 primary_error = RuntimeError("primary model error")
                 cleanup_error = RuntimeError("allocator cleanup error")
 
-                def fail_forward(chunk):
+                def fail_forward(chunk: int) -> None:
                     raise primary_error
 
                 if outcome == "failure":

@@ -1,7 +1,6 @@
 """Private Unix socket ownership for the gRPC server."""
 
 import fcntl
-import os
 from pathlib import Path
 import socket
 import stat
@@ -27,10 +26,10 @@ class UnixGrpcSocketTests(unittest.TestCase):
     def service(self):
         return server_module.CompletionService(Mock(), Mock())
 
-    def create_server(self, path=None, service=None):
+    def create_server(self, path: Path | None = None, service: Mock | None = None):
         return server_module.create_server(str(path or self.path), service or self.service())
 
-    def running_server(self, path=None):
+    def running_server(self, path: Path | None = None):
         server = self.create_server(path)
         server.start()
         self.addCleanup(server.stop, 0)

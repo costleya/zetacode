@@ -9,24 +9,36 @@ import sys
 import tempfile
 import types
 import unittest
+from typing import Protocol, cast
 from unittest.mock import Mock, patch
 
 
 spec = importlib.util.spec_from_file_location(
     'setup_progress_contract', Path(__file__).resolve().parents[1] / "src" / 'setup_progress.py')
+assert spec is not None and spec.loader is not None
 progress_module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(progress_module)
 SETUP_ID = '67ff8c7c-8ab2-4cec-8d5c-a491bc888038'
 
 
+class TestProgressBar(Protocol):
+    n: int | float
+    total: int | float | None
+
+    def update(self, n: int | float | None = 1) -> None: ...
+    def refresh(self) -> None: ...
+    def close(self) -> None: ...
+
+
 class QuietTqdm:
     """Minimal public tqdm counter API; disabled bars do not update themselves."""
 
-    def __init__(self, *args, total=None, initial=0, **kwargs):
+    def __init__(self, *args: object, total: int | float | None = None,
+                 initial: int = 0, **kwargs: object) -> None:
         self.n = initial
         self.total = total
 
-    def close(self):
+    def close(self) -> None:
         pass
 
 
@@ -43,18 +55,19 @@ class SetupProgressTests(unittest.TestCase):
         patch.object(progress_module.time, 'monotonic', side_effect=lambda: self.clock).start()
         patch.object(progress_module.time, 'time', side_effect=lambda: self.clock + 1_800_000_000).start()
         tqdm_module = types.ModuleType('huggingface_hub.utils.tqdm')
-        tqdm_module.tqdm = QuietTqdm
+        setattr(tqdm_module, 'tqdm', QuietTqdm)
         patch.dict(sys.modules, {'huggingface_hub.utils.tqdm': tqdm_module}).start()
         self.progress.stage('resolving', 'Zeta', 1)
 
     def read(self):
         return json.loads(self.status_file.read_text())
 
-    def bar(self, kind='transfer', **options):
+    def bar(self, kind: str = 'transfer', **options: object) -> TestProgressBar:
         name = 'huggingface_hub.snapshot_download'
         if kind == 'transfer':
             name += '.transfer'
-        return self.progress.tqdm_class()(name=name, unit='B', **options)
+        return cast(TestProgressBar,
+                    self.progress.tqdm_class()(name=name, unit='B', **options))
 
     def flush(self):
         self.clock += 2
@@ -65,7 +78,7 @@ class SetupProgressTests(unittest.TestCase):
         previous = self.status_file.read_text()
         replace = progress_module.os.replace
 
-        def observe_replace(source, destination):
+        def observe_replace(source: str, destination: str | Path) -> None:
             self.assertEqual(self.status_file.read_text(), previous)
             pending = json.loads(Path(source).read_text())
             self.assertEqual(pending['stage'], 'loading')
@@ -252,18 +265,20 @@ class ResolveModelTests(unittest.TestCase):
 
     def test_remote_model_passes_callback_only_to_explicit_snapshot_call(self):
         hub = types.ModuleType('huggingface_hub')
-        hub.snapshot_download = Mock(return_value='/cache/snapshot')
+        snapshot_download = Mock(return_value='/cache/snapshot')
+        setattr(hub, 'snapshot_download', snapshot_download)
         utils = types.ModuleType('mlx_lm.utils')
-        utils.DEFAULT_ALLOW_PATTERNS = ['*.safetensors', '*.json']
+        allow_patterns = ['*.safetensors', '*.json']
+        setattr(utils, 'DEFAULT_ALLOW_PATTERNS', allow_patterns)
         progress = Mock()
         with patch.dict(sys.modules, {'huggingface_hub': hub, 'mlx_lm.utils': utils}), \
                 patch.dict(os.environ, {'MLXLM_USE_MODELSCOPE': ''}):
-            original = hub.snapshot_download
+            original = snapshot_download
             result = progress_module.resolve_model('org/model', progress)
-            self.assertIs(hub.snapshot_download, original)
+            self.assertIs(getattr(hub, 'snapshot_download'), original)
         self.assertEqual(result, '/cache/snapshot')
-        hub.snapshot_download.assert_called_once_with(
-            'org/model', allow_patterns=utils.DEFAULT_ALLOW_PATTERNS,
+        snapshot_download.assert_called_once_with(
+            'org/model', allow_patterns=allow_patterns,
             tqdm_class=progress.tqdm_class.return_value)
 
 

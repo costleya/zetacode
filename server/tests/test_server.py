@@ -1,6 +1,7 @@
 """gRPC service contracts without loading MLX models."""
 
 import builtins
+from collections.abc import Mapping
 from concurrent.futures import ThreadPoolExecutor
 import importlib.util
 import io
@@ -10,33 +11,42 @@ import sys
 import threading
 import types
 import unittest
+from typing import Any, cast
 from unittest.mock import Mock, patch
 
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+from opentelemetry.trace import SpanContext
+from opentelemetry.util.types import AnyValue
 
 
-def load_server():
+def load_server() -> Any:
     """Load the production service while replacing only the model modules."""
     source = Path(__file__).resolve().parents[1] / "src"
     decoder = types.ModuleType("decoder")
-    decoder.Decoder = Mock()
-    decoder.MLXAllocator = Mock()
-    decoder.GenerationCancelled = type("GenerationCancelled", (InterruptedError,), {})
+    setattr(decoder, "Decoder", Mock())
+    setattr(decoder, "MLXAllocator", Mock())
+    setattr(
+        decoder,
+        "GenerationCancelled",
+        type("GenerationCancelled", (InterruptedError,), {}),
+    )
 
-    def nonnegative_int(value):
+    def nonnegative_int(value: int | str) -> int:
         parsed = int(value)
         if parsed < 0:
             raise ValueError("must be nonnegative")
         return parsed
 
-    decoder.nonnegative_int = nonnegative_int
+    setattr(decoder, "nonnegative_int", nonnegative_int)
     continuation_decoder = types.ModuleType("continuation_decoder")
-    continuation_decoder.ContinuationDecoder = Mock()
+    setattr(continuation_decoder, "ContinuationDecoder", Mock())
     spec = importlib.util.spec_from_file_location(
         "zeta_grpc_server_contract", source / "server.py")
+    if spec is None or spec.loader is None:
+        raise RuntimeError("could not load server module")
     module = importlib.util.module_from_spec(spec)
     missing = object()
     original_decoder = sys.modules.get("decoder", missing)
@@ -52,7 +62,7 @@ def load_server():
             if original is missing:
                 sys.modules.pop(name, None)
             else:
-                sys.modules[name] = original
+                sys.modules[name] = cast(types.ModuleType, original)
     return module
 
 
@@ -62,7 +72,7 @@ class ServerTests(unittest.TestCase):
         cls.server_module = load_server()
         cls.pb2 = cls.server_module.completion_pb2
 
-    def service(self, decoder=None, continuation_decoder=None):
+    def service(self, decoder: Any = None, continuation_decoder: Any = None) -> Any:
         decoder = decoder if decoder is not None else Mock()
         continuation_decoder = (continuation_decoder if continuation_decoder is not None
                                 else Mock())
@@ -75,9 +85,9 @@ class ServerTests(unittest.TestCase):
                 os.environ.pop('MLX_METAL_RESIDENCY_REFRESH_INTERVAL_MS', None)
                 if inherited is not None:
                     os.environ['MLX_METAL_RESIDENCY_REFRESH_INTERVAL_MS'] = inherited
-                observed = []
+                observed: list[str | None] = []
 
-                def observe_import(name, *args, **kwargs):
+                def observe_import(name: str, *args: Any, **kwargs: Any) -> Any:
                     if name == 'decoder':
                         observed.append(os.environ.get('MLX_METAL_RESIDENCY_REFRESH_INTERVAL_MS'))
                     return original_import(name, *args, **kwargs)
@@ -88,15 +98,22 @@ class ServerTests(unittest.TestCase):
 
     def test_residency_is_configured_once_after_both_models_load(self):
         module = self.server_module
-        events = []
+        events: list[object] = []
         allocator = Mock()
-        allocator.configure_residency.side_effect = lambda interval: events.append(('wire', interval))
+
+        def record_residency(interval: str) -> None:
+            events.append(('wire', interval))
+
+        def resolve_model(model: str, _: Any) -> str:
+            return model
+
+        allocator.configure_residency.side_effect = record_residency
         zeta, qwen = Mock(), Mock()
         zeta.memory_snapshot.return_value = {}
         qwen.memory_snapshot.return_value = {}
 
-        def load_model(label, model):
-            def loaded(*args, **kwargs):
+        def load_model(label: str, model: Any) -> Any:
+            def loaded(*args: Any, **kwargs: Any) -> Any:
                 self.assertIs(kwargs['allocator'], allocator)
                 events.append(label)
                 return model
@@ -109,7 +126,7 @@ class ServerTests(unittest.TestCase):
                 patch.object(module, 'ContinuationDecoder', side_effect=load_model('qwen', qwen)), \
                 patch.object(module, 'SetupProgress'), \
                 patch.object(module, 'PrivateUnixSocket'), \
-                patch.object(module, 'resolve_model', side_effect=lambda model, _: model), \
+                patch.object(module, 'resolve_model', side_effect=resolve_model), \
                 patch.object(module, 'CompletionService'), \
                 patch.object(module, 'create_server'), \
                 patch('sys.stdout', new_callable=io.StringIO):
@@ -130,10 +147,10 @@ class ServerTests(unittest.TestCase):
         observability.configure_tracing(provider)
         service = None
         rendezvous = threading.Barrier(2)
-        worker_contexts = []
+        worker_contexts: list[int] = []
         contexts_lock = threading.Lock()
 
-        def generate(*args, **kwargs):
+        def generate(*args: Any, **kwargs: Any) -> dict[str, object]:
             span_context = trace.get_current_span().get_span_context()
             with contexts_lock:
                 worker_contexts.append(span_context.trace_id)
@@ -156,16 +173,16 @@ class ServerTests(unittest.TestCase):
         decoder.generate.side_effect = generate
         service = self.service(decoder=decoder)
 
-        def metadata(trace_id, span_id):
+        def metadata(trace_id: int, span_id: int) -> tuple[tuple[str, str], ...]:
             return (
                 ("traceparent", f"00-{trace_id:032x}-{span_id:016x}-01"),
                 ("tracestate", "vendor=value"),
             )
 
-        def request_context(request_metadata):
+        def request_context(request_metadata: tuple[tuple[str, str], ...]) -> Any:
             return _ActiveContext(metadata=request_metadata)
 
-        def invoke(request_metadata):
+        def invoke(request_metadata: tuple[tuple[str, str], ...]) -> list[Any]:
             request = self.pb2.CompletionRequest(
                 model="zeta-2.1", prompt="private prompt", temperature=0)
             return list(service.Complete(request, request_context(request_metadata)))
@@ -187,17 +204,32 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(len(generations), 2)
             for root in roots:
                 self.assertEqual(root.kind.name, "SERVER")
-                expected_remote_parent = {0x1111: 0xAAAA, 0x2222: 0xBBBB}[root.context.trace_id]
-                self.assertEqual(root.parent.span_id, expected_remote_parent)
-                generation = next(span for span in generations
-                                  if span.context.trace_id == root.context.trace_id)
-                self.assertEqual(generation.parent.span_id, root.context.span_id)
+                root_context = cast(SpanContext, root.context)
+                expected_remote_parent = {
+                    0x1111: 0xAAAA,
+                    0x2222: 0xBBBB,
+                }[root_context.trace_id]
+                self.assertEqual(cast(SpanContext, root.parent).span_id, expected_remote_parent)
+                generation = next(
+                    span for span in generations
+                    if cast(SpanContext, span.context).trace_id == root_context.trace_id
+                )
+                self.assertEqual(
+                    cast(SpanContext, generation.parent).span_id,
+                    root_context.span_id,
+                )
                 for name in ("decoder.prefill", "decoder.decode"):
                     child = next(span for span in spans
                                  if span.name == name
-                                 and span.context.trace_id == root.context.trace_id)
-                    self.assertEqual(child.parent.span_id, generation.context.span_id)
-                self.assertEqual(root.attributes["nesweep.outcome"], "success")
+                                 and cast(SpanContext, span.context).trace_id == root_context.trace_id)
+                    self.assertEqual(
+                        cast(SpanContext, child.parent).span_id,
+                        cast(SpanContext, generation.context).span_id,
+                    )
+                self.assertEqual(
+                    cast(Mapping[str, AnyValue], root.attributes)["nesweep.outcome"],
+                    "success",
+                )
 
             private_values = (
                 "private prompt", "private completion output", "/private/model/path",
@@ -238,11 +270,17 @@ class ServerTests(unittest.TestCase):
             roots = [span for span in exporter.get_finished_spans()
                      if span.name == "nesweep.CompletionService/Complete"]
             self.assertEqual(len(roots), 3)
-            valid = next(span for span in roots if span.context.trace_id == 0x3333)
-            self.assertEqual(valid.parent.span_id, 0xCCCC)
+            valid = next(
+                span for span in roots
+                if cast(SpanContext, span.context).trace_id == 0x3333
+            )
+            self.assertEqual(cast(SpanContext, valid.parent).span_id, 0xCCCC)
             invalid_and_absent = [span for span in roots if span is not valid]
             self.assertTrue(all(span.parent is None for span in invalid_and_absent))
-            self.assertEqual(len({span.context.trace_id for span in roots}), 3)
+            self.assertEqual(
+                len({cast(SpanContext, span.context).trace_id for span in roots}),
+                3,
+            )
         finally:
             service.shutdown()
             observability.shutdown_tracing()
@@ -290,25 +328,25 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(decoder.generate.call_args.kwargs["max_tokens"], 0)
 
 class _ActiveContext:
-    def __init__(self, metadata=()):
+    def __init__(self, metadata: tuple[tuple[str, str], ...] = ()) -> None:
         self.active = True
         self.callback = None
         self.metadata = metadata
 
-    def time_remaining(self):
+    def time_remaining(self) -> None:
         return None
 
-    def add_callback(self, callback):
+    def add_callback(self, callback: Any) -> bool:
         self.callback = callback
         return True
 
-    def invocation_metadata(self):
+    def invocation_metadata(self) -> tuple[tuple[str, str], ...]:
         return self.metadata
 
-    def is_active(self):
+    def is_active(self) -> bool:
         return self.active
 
-    def abort(self, code, details):
+    def abort(self, code: Any, details: str) -> None:
         raise AssertionError(f"unexpected RPC abort: {code}: {details}")
 
 

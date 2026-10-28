@@ -1,6 +1,11 @@
 {
-  "include": ["server/src"],
+  "include": ["server/src", "server/tests"],
   "exclude": [
+    "server/src/completion_pb2.py",
+    "server/src/completion_pb2_grpc.py",
+    "server/src/completion_pb2.pyi"
+  ],
+  "ignore": [
     "server/src/completion_pb2.py",
     "server/src/completion_pb2_grpc.py",
     "server/src/completion_pb2.pyi"
@@ -8,6 +13,7 @@
   "typeCheckingMode": "strict",
   "pythonVersion": "3.13",
   "pythonPlatform": "Darwin",
+  "extraPaths": ["server/src"],
   "venvPath": "server",
   "venv": ".venv",
   "stubPath": "server/typings"
